@@ -18,6 +18,7 @@ CPPSRC	= pr_sdp.cpp\
             EIG.cpp\
             Hessian.cpp\
             TPTPM.cpp\
+            TPTPV.cpp\
             Newton.cpp
 
 OBJ	= $(CPPSRC:.cpp=.o)

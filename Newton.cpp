@@ -171,7 +171,7 @@ void Newton::gradient(double t,const TPM &ham,const SUP &P){
       x[i] += t * TT2(I,J);
 #endif
 
-      x[i] *= 2.0 * norm[i];
+      x[i] *= 2.0 * TPTPV::gnorm(i);
 
    }
 

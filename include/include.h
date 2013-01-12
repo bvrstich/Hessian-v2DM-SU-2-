@@ -46,6 +46,7 @@
 
 #include "Hessian.h"
 #include "TPTPM.h"
+#include "TPTPV.h"
 
 #include "SUP.h"
 #include "EIG.h"

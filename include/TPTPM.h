@@ -54,8 +54,6 @@ class TPTPM : public Matrix {
 
       static int gt2tpmm(int,int);
 
-      static double gnorm(int);
-
       static double gnorm(int,int);
  
       static void init();
@@ -69,9 +67,6 @@ class TPTPM : public Matrix {
 
       //!list relating the single-particle space to the TPTPM basis
       static int **t2tpmm;
-
-      static double *norm;
-
 
 };
 

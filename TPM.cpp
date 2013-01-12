@@ -489,7 +489,7 @@ void TPM::convert(const Newton &newton){
 
    for(int i = 0;i < gn();++i)
       for(int j = i;j < gn();++j)
-         (*this)(i,j) = newton.gx(i,j)/(2.0*Newton::gnorm(i,j));
+         (*this)(i,j) = newton.gx(i,j)/(2.0*TPTPV::gnorm(i,j));
 
    this->symmetrize();
 

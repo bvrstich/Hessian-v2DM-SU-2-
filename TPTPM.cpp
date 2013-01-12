@@ -16,8 +16,6 @@ using std::ios;
 int **TPTPM::t2tpmm;
 vector< vector<int> > TPTPM::tpmm2t;
 
-double *TPTPM::norm;
-
 /**
  * initialize the static lists
  */
@@ -47,22 +45,6 @@ void TPTPM::init(){
 
       }
 
-   norm = new double [TPTPM::gn()];
-
-   int hess = 0;
-
-   for(int i = 0;i < TPM::gn();++i)
-      for(int j = i;j < TPM::gn();++j){
-
-         if(i == j)
-            norm[hess] = 0.5;
-         else
-            norm[hess] = std::sqrt(0.5);
-
-         ++hess;
-
-      }
-
 }
 
 /**
@@ -74,8 +56,6 @@ void TPTPM::clear(){
       delete [] t2tpmm[i];
 
    delete [] t2tpmm;
-
-   delete [] norm;
 
 }
 
@@ -224,26 +204,5 @@ int TPTPM::gt2tpmm(int i,int j){
 int TPTPM::gtpmm2t(int i,int option){
 
    return tpmm2t[i][option];
-
-}
-
-/**
- * access to the norm from outside of the class
- * @param i hess index, if a == b norm = 1.0/sqrt(2.0)
- */
-double TPTPM::gnorm(int i){
-
-   return norm[i];
-
-}
-
-/**
- * access to the norm from outside of the class, in tp mode
- * @param I row index
- * @param J column index
- */
-double TPTPM::gnorm(int I,int J){
-
-   return norm[TPTPM::gt2tpmm(I,J)];
 
 }
