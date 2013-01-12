@@ -13,6 +13,7 @@ using std::vector;
 class SPM;
 class SUP;
 class Newton;
+class TPTPV;
 
 /**
  * @author Brecht Verstichel
@@ -85,6 +86,8 @@ class TPM : public Matrix {
       void constr_sp_diag(int);
 
       void convert(const Newton &);
+
+      void convert(const TPTPV &);
 
       static int gs2t(int,int);
 

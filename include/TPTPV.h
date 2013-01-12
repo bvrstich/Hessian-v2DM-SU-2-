@@ -39,6 +39,8 @@ class TPTPV {
 
       const double *gpointer() const;
 
+      void convert(const TPM &);
+
       static double gnorm(int);
 
       static double gnorm(int,int);

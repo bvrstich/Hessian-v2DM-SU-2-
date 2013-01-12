@@ -127,3 +127,22 @@ double &TPTPV::operator[](int i){
    return tpvv[i];
 
 }
+
+/**
+ * convert a 2DM/TPM to vector form
+ * @param tpm the 2DM in question
+ */
+void TPTPV::convert(const TPM &tpm){
+
+   int I,J;
+
+   for(int i = 0;i < n;++i){
+
+      I = TPTPM::gtpmm2t(i,0);
+      J = TPTPM::gtpmm2t(i,1);
+
+      tpvv[i] = 2.0 * norm[i] * tpm(I,J);
+
+   }
+
+}

@@ -496,6 +496,27 @@ void TPM::convert(const Newton &newton){
 }
 
 /**
+ * convert a TPTPV object to a 2DM
+ * @param tpvv the TPTPV object
+ */
+void TPM::convert(const TPTPV &tpvv){
+
+   int tpmm_i;
+
+   for(int i = 0;i < gn();++i)
+      for(int j = i;j < gn();++j){
+
+         tpmm_i = TPTPM::gt2tpmm(i,j);
+
+         (*this)(i,j) = tpvv[tpmm_i]/(2.0*TPTPV::gnorm(tpmm_i));
+
+      }
+
+   this->symmetrize();
+
+}
+
+/**
  * access to the lists from outside the class
  */
 int TPM::gt2s(int i,int option){
