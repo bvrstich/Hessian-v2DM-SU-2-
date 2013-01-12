@@ -15,7 +15,6 @@ using std::vector;
  * @date 21-11-2012\n\n
  * This is a class written for the construction and solution of the Newton system. 
  */
-
 class Newton{
 
    public:
@@ -31,21 +30,7 @@ class Newton{
 
       const Hessian &gH() const;
 
-      const double *gx() const;
-
-      double *gx();
-
-      double gx(int,int) const;
-
-      double gx(int,int,int,int) const;
-
       void construct(double,const TPM &,const SUP &);
-
-      void gradient(double,const TPM &,const SUP &);
-
-      static void init();
-
-      static void clear();
 
    private:
 
@@ -53,7 +38,7 @@ class Newton{
       Hessian *H;
 
       //!input gradient, output delta
-      double *x;
+      Gradient *gradient;
 
 };
 

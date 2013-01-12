@@ -44,9 +44,10 @@
 #include "TPM.h"
 #include "SPM.h"
 
-#include "Hessian.h"
 #include "TPTPM.h"
+#include "Hessian.h"
 #include "TPTPV.h"
+#include "Gradient.h"
 
 #include "SUP.h"
 #include "EIG.h"

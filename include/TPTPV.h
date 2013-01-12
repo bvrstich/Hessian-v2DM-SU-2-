@@ -8,7 +8,7 @@ using std::ostream;
 
 /**
  * @author Brecht Verstichel
- * @date 23-11-2012\n\n
+ * @date 12-01-2013\n\n
  * This class TPTPV is a class written for the transformation of a 2DM to a vector.
  * It contains the lists relating these two objects and functions that transform them.
  */

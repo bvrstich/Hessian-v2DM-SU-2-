@@ -17,7 +17,7 @@ Newton::Newton(){
 
    H = new Hessian();
 
-   x = new double [TPTPM::gn() + 1];
+   gradient = new Gradient();
 
 }
 
@@ -28,10 +28,7 @@ Newton::Newton(const Newton &newton_c){
 
    H = new Hessian(newton_c.gH());
 
-   x = new double [TPTPM::gn() + 1];
-
-   for(int i = 0;i < TPTPM::gn() + 1;++i)
-      x[i] = newton_c.gx()[i];
+   gradient = new Gradient(newton_c.gGradient());
 
 }
 
@@ -42,7 +39,7 @@ Newton::~Newton(){
 
    delete H;
 
-   delete [] x;
+   delete gradient;
 
 }
 
@@ -56,20 +53,11 @@ const Hessian &Newton::gH() const {
 }
 
 /**
- * @return the "vector" x, read only
+ * @return the full Gradient, read only
  */
-const double* Newton::gx() const {
+const Gradient &Newton::gGradient() const {
 
-   return x;
-
-}
-
-/**
- * @return the "vector" x, read and write
- */
-double* Newton::gx() {
-
-   return x;
+   return *gradient;
 
 }
 
