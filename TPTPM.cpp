@@ -13,7 +13,7 @@ using std::ios;
 
 #include "include.h"
 
-int **TPTPM::t2tpmm;
+int ***TPTPM::t2tpmm;
 vector< vector<int> > TPTPM::tpmm2t;
 
 /**
@@ -21,29 +21,40 @@ vector< vector<int> > TPTPM::tpmm2t;
  */
 void TPTPM::init(){
 
-   t2tpmm = new int * [TPM::gn()];
+   t2tpmm = new int ** [2];
 
-   for(int i = 0;i < TPM::gn();++i)
-      t2tpmm[i] = new int [TPM::gn()];
+   for(int S = 0;S < 2;++S){
 
-   vector<int> v(2);
+      t2tpmm[S] = new int * [TPM::gdim(S)];
+
+      for(int i = 0;i < TPM::gdim(S);++i)
+      t2tpmm[S][i] = new int [TPM::gdim(S)];
+
+   }
+
+   vector<int> v(3);
 
    int tpmm = 0;
 
-   for(int i = 0;i < TPM::gn();++i)
-      for(int j = i;j < TPM::gn();++j){
+   for(int S = 0;S < 2;++S){
 
-         v[0] = i;
-         v[1] = j;
+      for(int i = 0;i < TPM::gdim(S);++i)
+         for(int j = i;j < TPM::gdim(S);++j){
 
-         tpmm2t.push_back(v);
+            v[0] = S;
+            v[1] = i;
+            v[2] = j;
 
-         t2tpmm[i][j] = tpmm;
-         t2tpmm[j][i] = tpmm;
+            tpmm2t.push_back(v);
 
-         ++tpmm;
+            t2tpmm[S][i][j] = tpmm;
+            t2tpmm[S][j][i] = tpmm;
 
-      }
+            ++tpmm;
+
+         }
+
+   }
 
 }
 
@@ -52,8 +63,14 @@ void TPTPM::init(){
  */
 void TPTPM::clear(){
 
-   for(int i = 0;i < TPM::gn();++i)
-      delete [] t2tpmm[i];
+   for(int S = 0;S < 2;++S){
+
+      for(int i = 0;i < TPM::gdim(S);++i)
+         delete [] t2tpmm[S][i];
+
+      delete [] t2tpmm[S];
+
+   }
 
    delete [] t2tpmm;
 
@@ -76,63 +93,19 @@ TPTPM::TPTPM(const TPTPM &tpmm_c) : Matrix(tpmm_c){ }
 TPTPM::~TPTPM(){ }
 
 /**
- * access the elements of the matrix in sp mode, antisymmetry is automatically accounted for:\n\n
- * @param a first sp index that forms the tp row index i together with b
- * @param b second sp index that forms the tp row index i together with a
- * @param c first sp index that forms the tp column index j together with d
- * @param d second sp index that forms the tp column index j together with c
- * @param e first sp index that forms the tp row index i together with b
- * @param z second sp index that forms the tp row index i together with a
- * @param t first sp index that forms the tp column index j together with d
- * @param h second sp index that forms the tp column index j together with c
- * @return the number on place TPTPM(i,j) with the right phase.
- */
-double TPTPM::operator()(int a,int b,int c,int d,int e,int z,int t,int h) const{
-
-   if( (a == b) || (c == d) || (e == z) || (t == h))
-      return 0;
-   else{
-
-      int I = TPM::gs2t(a,b);
-      int J = TPM::gs2t(c,d);
-      int K = TPM::gs2t(e,z);
-      int L = TPM::gs2t(t,h);
-
-      int phase = 1;
-
-      if(a > b)
-         phase *= -1;
-
-      if(c > d)
-         phase *= -1;
-
-      if(e > z)
-         phase *= -1;
-
-      if(t > h)
-         phase *= -1;
-
-      int i = t2tpmm[I][J];
-      int j = t2tpmm[K][L];
-
-      return phase * (*this)(i,j);
-
-   }
-
-}
-
-/**
  * access the elements of the matrix in tp mode
+ * @param S spin index of the first two indices
  * @param I first tp index that forms the tpmm row index i together with J
  * @param J second tp index that forms the tpmm row index i together with I
+ * @param S_ spin index of the second two indices
  * @param K first tp index that forms the tpmm column index j together with L
  * @param L second tp index that forms the tpmm column index j together with K
  * @return the number on place TPTPM(i,j)
  */
-double TPTPM::operator()(int I,int J,int K,int L) const{
+double TPTPM::operator()(int S,int I,int J,int S_,int K,int L) const{
 
-   int i = t2tpmm[I][J];
-   int j = t2tpmm[K][L];
+   int i = t2tpmm[S][I][J];
+   int j = t2tpmm[S_][K][L];
 
    return (*this)(i,j);
 
@@ -140,34 +113,36 @@ double TPTPM::operator()(int I,int J,int K,int L) const{
 
 ostream &operator<<(ostream &output,const TPTPM &tpmm_p){
 
-   int I,J,K,L;
+   int S,I,J,S_,K,L;
 
    int a,b,c,d;
    int e,z,t,h;
 
    for(int i = 0;i < TPTPM::gn();++i){
 
-      I = tpmm_p.tpmm2t[i][0];
-      J = tpmm_p.tpmm2t[i][1];
+      S = tpmm_p.tpmm2t[i][0];
+      I = tpmm_p.tpmm2t[i][1];
+      J = tpmm_p.tpmm2t[i][2];
 
-      a = TPM::gt2s(I,0);
-      b = TPM::gt2s(I,1);
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
 
-      c = TPM::gt2s(J,0);
-      d = TPM::gt2s(J,1);
+      c = TPM::gt2s(S,J,0);
+      d = TPM::gt2s(S,J,1);
 
       for(int j = i;j < TPTPM::gn();++j){
 
-         K = tpmm_p.tpmm2t[j][0];
-         L = tpmm_p.tpmm2t[j][1];
+         S_ = tpmm_p.tpmm2t[j][0]; 
+         K = tpmm_p.tpmm2t[j][1];
+         L = tpmm_p.tpmm2t[j][2];
 
-         e = TPM::gt2s(K,0);
-         z = TPM::gt2s(K,1);
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
 
-         t = TPM::gt2s(L,0);
-         h = TPM::gt2s(L,1);
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
 
-         output << i << "\t" << j << "\t|\t" << I << "\t" << J << "\t" << K << "\t" << L << "\t|\t" << 
+         output << i << "\t" << j << "\t|\t(" << S << ")\t" << I << "\t" << J << "\t(" << S_ << ")\t" << K << "\t" << L << "\t|\t" << 
 
             "(" << a << "," << b << "," << c << "," << d << ")\t(" << e << "," << z << "," << t << "," << h << ")\t|\t" << tpmm_p(i,j) << endl;
 
@@ -191,15 +166,15 @@ int TPTPM::gn(){
 /**
  * access to the lists from outside the class
  */
-int TPTPM::gt2tpmm(int i,int j){
+int TPTPM::gt2tpmm(int S,int I,int J){
 
-   return t2tpmm[i][j];
+   return t2tpmm[S][I][J];
 
 }
 
 /**
  * access to the lists from outside the class
- * @param option == 0 return a, == 1 return b
+ * @param option == 0 return S, == 1 return a, == 2 return b
  */
 int TPTPM::gtpmm2t(int i,int option){
 

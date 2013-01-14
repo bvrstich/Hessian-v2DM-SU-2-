@@ -52,7 +52,7 @@ class Gradient {
       
       static double gnorm(int);
 
-      static double gnorm(int,int);
+      static double gnorm(int,int,int);
 
 
    private:

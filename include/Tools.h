@@ -32,7 +32,7 @@ class Tools{
       //!nr of particles
       static int N;
 
-      //!nr of orbitals
+      //!nr of spatial orbitals
       static int M;
 
       static double *x6j;

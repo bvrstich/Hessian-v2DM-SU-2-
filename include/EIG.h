@@ -6,7 +6,7 @@
 
 using std::ostream;
 
-#include "Vector.h"
+#include "BlockVector.h"
 #include "SUP.h"
 
 #ifdef PQ
@@ -82,32 +82,32 @@ class EIG{
       //overload equality operator
       EIG &operator=(const EIG &);
 
-      Vector<TPM> &gvI();
+      BlockVector<TPM> &gvI();
 
-      const Vector<TPM> &gvI() const;
+      const BlockVector<TPM> &gvI() const;
 
 #ifdef __Q_CON
-      Vector<TPM> &gvQ();
+      BlockVector<TPM> &gvQ();
 
-      const Vector<TPM> &gvQ() const;
+      const BlockVector<TPM> &gvQ() const;
 #endif
 
 #ifdef __G_CON
-      Vector<PHM> &gvG();
+      BlockVector<PHM> &gvG();
 
-      const Vector<PHM> &gvG() const;
+      const BlockVector<PHM> &gvG() const;
 #endif
 
 #ifdef __T1_CON
-      Vector<DPM> &gvT1();
+      BlockVector<DPM> &gvT1();
 
-      const Vector<DPM> &gvT1() const;
+      const BlockVector<DPM> &gvT1() const;
 #endif
 
 #ifdef __T2_CON
-      Vector<PPHM> &gvT2();
+      BlockVector<PPHM> &gvT2();
 
-      const Vector<PPHM> &gvT2() const;
+      const BlockVector<PPHM> &gvT2() const;
 #endif
 
       double min() const;
@@ -118,26 +118,26 @@ class EIG{
 
    private:
 
-      //!pointer to a Vector<TPM> object, the eigenvalues of the P part of a SUP matrix are stored here
-      Vector<TPM> *vI;
+      //!pointer to a BlockVector<TPM> object, the eigenvalues of the P part of a SUP matrix are stored here
+      BlockVector<TPM> *vI;
 
 #ifdef __Q_CON
-      Vector<TPM> *vQ;
+      BlockVector<TPM> *vQ;
 #endif
 
 #ifdef __G_CON
-      //!single pointer to a Vector<PHM> object, the eigenvalues of G part of a SUP matrix will be stored here.
-      Vector<PHM> *vG;
+      //!single pointer to a BlockVector<PHM> object, the eigenvalues of G part of a SUP matrix will be stored here.
+      BlockVector<PHM> *vG;
 #endif
 
 #ifdef __T1_CON
-      //!single pointer to a Vector<DPM> object, the eigenvalues of T1 part of a SUP matrix will be stored here.
-      Vector<DPM> *vT1;
+      //!single pointer to a BlockVector<DPM> object, the eigenvalues of T1 part of a SUP matrix will be stored here.
+      BlockVector<DPM> *vT1;
 #endif
 
 #ifdef __T2_CON
-      //!single pointer to a Vector<PPHM> object, the eigenvalues of T2 part of a SUP matrix will be stored here.
-      Vector<PPHM> *vT2;
+      //!single pointer to a BlockVector<PPHM> object, the eigenvalues of T2 part of a SUP matrix will be stored here.
+      BlockVector<PPHM> *vT2;
 #endif
 
 };

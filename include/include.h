@@ -39,6 +39,9 @@
 
 #include "lapack.h"
 #include "Matrix.h"
+#include "BlockMatrix.h"
+#include "Vector.h"
+#include "BlockVector.h"
 #include "RecMat.h"
 #include "Vector.h"
 #include "TPM.h"

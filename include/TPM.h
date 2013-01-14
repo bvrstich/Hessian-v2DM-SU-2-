@@ -8,22 +8,19 @@
 using std::ostream;
 using std::vector;
 
-#include "Matrix.h"
+#include "BlockMatrix.h"
 
-class SPM;
-class SUP;
-class Newton;
 class Gradient;
+class SUP;
 
 /**
  * @author Brecht Verstichel
- * @date 23-02-2010\n\n
- * This class TPM is a class written for two particle matrices, it inherits alle the function from its mother 
- * Matrix, some special member functions and two lists that give the relationship between the sp and the tp 
+ * @date 19-04-2010\n\n
+ * This class TPM is a class written for two particle matrices with spinsymmetry included, it inherits alle the function from its mother 
+ * BlockMatrix, some special member functions and two lists that give the relationship between the sp and the tp 
  * basis.
  */
-
-class TPM : public Matrix {
+class TPM : public BlockMatrix {
 
    /**
     * Output stream operator overloaded, the usage is simple, if you want to print to a file, make an
@@ -44,20 +41,17 @@ class TPM : public Matrix {
       //copy constructor
       TPM(const TPM &);
 
-      //file constructor
-      TPM(const char *);
-
       //destructor
       virtual ~TPM();
 
-      using Matrix::operator=;
+      using BlockMatrix::operator=;
 
-      using Matrix::operator();
+      using BlockMatrix::operator();
 
-      //easy to access the numbers, in sp mode
-      double operator()(int a,int b,int c,int d) const;
+      //easy to access the numbers, in sp mode and with spin quantumnumer
+      double operator()(int S,int a,int b,int c,int d) const;
 
-      void hubbard(int option,double U);
+      void hubbard(double U);
 
       //Q afbeelding en zijn inverse
       void Q(int option,const TPM &);
@@ -67,43 +61,37 @@ class TPM : public Matrix {
 
       void unit();
 
-      void proj_Tr();
-
-      void min_unit(double scale);
-
-      void min_qunit(double scale);
-
-      void in_sp(const char *);
-
-      double line_search(double t,SUP &,const TPM &ham);
-
-      double line_search(double t,const TPM &,const TPM &);
-
-      double S_2() const;
+      void set_unit();
 
       void set_S_2();
 
-      void constr_sp_diag(int);
+      void proj_Tr();
 
       void convert(const Gradient &);
 
-      static int gs2t(int,int);
+      double line_search(double,SUP &,TPM &);
 
-      static int gt2s(int,int);
+      double line_search(double,TPM &,TPM &);
 
-      static int gn();
-      
+      double S_2() const;
+
       static void init();
 
       static void clear();
 
+      static int gt2s(int,int,int);
+
+      static int gs2t(int,int,int);
+
+      static int gdim(int);
+
    private:
 
-      //!static list of dimension [n_tp][2] that takes in a tp index i and returns two sp indices: a = t2s[i][0] and b = t2s[i][1]
-      static vector< vector<int> > t2s;
+      //!static list of dimension [2][dim[i]][2] that takes in a tp index i and a spinquantumnumber S, and returns two sp indices: a = t2s[S][i][0] and b = t2s[S][i][1]
+      static vector< vector<int> > *t2s;
 
-      //!static list of dimension [M][M] that takes two sp indices a,b and returns a tp index i: i = s2t[a][b]
-      static int **s2t;
+      //!static list of dimension [2][M/2][M/2] that takes two sp indices a,b and a spinquantumnumber S, and returns a tp index i: i = s2t[S][a][b]
+      static int ***s2t;
 
 };
 

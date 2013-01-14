@@ -23,19 +23,25 @@ void Gradient::init(){
 
    norm = new double [n];
 
-   int hess = 0;
+   int tpmm = 0;
 
-   for(int i = 0;i < TPM::gn();++i)
-      for(int j = i;j < TPM::gn();++j){
+   for(int S = 0;S < 2;++S){
 
-         if(i == j)
-            norm[hess] = 0.5;
-         else
-            norm[hess] = std::sqrt(0.5);
+      for(int i = 0;i < TPM::gdim(S);++i)
+         for(int j = i;j < TPM::gdim(S);++j){
 
-         ++hess;
+            if(i == j)
+               norm[tpmm] = 0.5;
+            else
+               norm[tpmm] = std::sqrt(0.5);
 
-      }
+            norm[tpmm] /= std::sqrt(2.0*S + 1.0);
+
+            ++tpmm;
+
+         }
+
+   }
 
 }
 
@@ -54,7 +60,7 @@ void Gradient::clear(){
 Gradient::Gradient() {
 
    gradient = new double [TPTPM::gn() + 1];
-   
+
 }
 
 /**
@@ -70,7 +76,7 @@ Gradient::Gradient(const Gradient &gradient_c){
    int inc = 1;
 
    dcopy_(&n,gradient_c.gpointer(),&inc,gradient,&inc);
-   
+
 }
 
 /**
@@ -79,7 +85,7 @@ Gradient::Gradient(const Gradient &gradient_c){
 Gradient::~Gradient(){ 
 
    delete [] gradient;
-   
+
 }
 
 /**
@@ -99,8 +105,6 @@ double *Gradient::gpointer(){
    return gradient;
 
 }
-
-
 
 /** 
  * access to the numbers in the vector, const
@@ -128,7 +132,7 @@ double &Gradient::operator[](int i){
  */
 void Gradient::construct(double t,const TPM &ham,const SUP &P){
 
-   int I,J;
+   int S,I,J;
 
 #ifdef __Q_CON
    TPM QQ;
@@ -152,10 +156,11 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
 
    for(int i = 0;i < TPTPM::gn();++i){
 
-      I = TPTPM::gtpmm2t(i,0);
-      J = TPTPM::gtpmm2t(i,1);
+      S = TPTPM::gtpmm2t(i,0);
+      I = TPTPM::gtpmm2t(i,1);
+      J = TPTPM::gtpmm2t(i,2);
 
-      gradient[i] = t * P.gI()(I,J) - ham(I,J);
+      gradient[i] = t * P.gI()(S,I,J) - ham(S,I,J);
 
 #ifdef __Q_CON
       gradient[i] += t * QQ(I,J);
@@ -173,7 +178,7 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
       gradient[i] += t * TT2(I,J);
 #endif
 
-      gradient[i] *= 2.0 * norm[i];
+      gradient[i] *= 2.0 * norm[i] * (2.0*S + 1.0);
 
    }
 
@@ -188,19 +193,19 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
  */
 void Gradient::convert(const TPM &tpm){
 
-   int I,J;
+   int S,I,J;
 
    for(int i = 0;i < TPTPM::gn();++i){
 
-      I = TPTPM::gtpmm2t(i,0);
-      J = TPTPM::gtpmm2t(i,1);
+      S = TPTPM::gtpmm2t(i,0);
+      I = TPTPM::gtpmm2t(i,1);
+      J = TPTPM::gtpmm2t(i,2);
 
-      gradient[i] = 2.0 * norm[i] * tpm(I,J);
+      gradient[i] = 2.0 * norm[i] * (2.0*S + 1.0) * tpm(S,I,J);
 
    }
 
 }
-
 
 /**
  * access to the norm from outside of the class
@@ -214,11 +219,12 @@ double Gradient::gnorm(int i){
 
 /**
  * access to the norm from outside of the class, in tp mode
+ * @param S spin-block index index
  * @param I row index
  * @param J column index
  */
-double Gradient::gnorm(int I,int J){
+double Gradient::gnorm(int S,int I,int J){
 
-   return norm[TPTPM::gt2tpmm(I,J)];
+   return norm[TPTPM::gt2tpmm(S,I,J)];
 
 }

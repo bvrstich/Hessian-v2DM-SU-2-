@@ -84,7 +84,7 @@ double Tools::g9j(int S,int Z,int S_ab,int S_cd){
 }
 
 /**
- * @return nr of orbitals, dim of sp space
+ * @return nr of spatial orbitals
  */
 int Tools::gM(){
 

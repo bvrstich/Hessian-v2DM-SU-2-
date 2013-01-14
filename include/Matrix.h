@@ -8,6 +8,8 @@ using std::ostream;
 
 #include "Vector.h"
 
+class Vector;
+
 /**
  * @author Brecht Verstichel
  * @date 18-02-2010\n\n
@@ -83,7 +85,7 @@ class Matrix{
       //positieve of negatieve vierkantswortel uit de matrix
       void sqrt(int option);
 
-      void mdiag(const Vector<Matrix> &diag);
+      void mdiag(const Vector &diag);
 
       void L_map(const Matrix &,const Matrix &);
 

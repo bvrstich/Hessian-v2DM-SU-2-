@@ -11,6 +11,8 @@ BINNAME = pr_sdp
 CPPSRC	= pr_sdp.cpp\
             Tools.cpp\
             Matrix.cpp\
+            BlockMatrix.cpp\
+            Vector.cpp\
             RecMat.cpp\
             TPM.cpp\
             SPM.cpp\

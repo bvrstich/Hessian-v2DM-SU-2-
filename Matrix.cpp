@@ -304,7 +304,7 @@ void Matrix::sqrt(int option){
 
    Matrix hulp(*this);
 
-   Vector<Matrix> eigen(hulp);
+   Vector eigen(hulp);
 
    if(option == 1)
       for(int i = 0;i < n;++i)
@@ -334,7 +334,7 @@ void Matrix::sqrt(int option){
  * Multiply this matrix with diagonal matrix
  * @param diag Diagonal matrix to multiply with this, has to be allocated on matrix dimension.
  */
-void Matrix::mdiag(const Vector<Matrix> &diag){
+void Matrix::mdiag(const Vector &diag){
 
    int inc = 1;
 

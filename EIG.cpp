@@ -14,22 +14,22 @@ using std::endl;
  */
 EIG::EIG(SUP &sup){
 
-   vI = new Vector<TPM>(sup.gI());
+   vI = new BlockVector<TPM>(sup.gI());
 
 #ifdef __Q_CON
-   vQ = new Vector<TPM>(sup.gQ());
+   vQ = new BlockVector<TPM>(sup.gQ());
 #endif
 
 #ifdef __G_CON
-   vG = new Vector<PHM>(sup.gG());
+   vG = new BlockVector<PHM>(sup.gG());
 #endif
 
 #ifdef __T1_CON
-   vT1 = new Vector<DPM>(sup.gT1());
+   vT1 = new BlockVector<DPM>(sup.gT1());
 #endif
 
 #ifdef __T2_CON
-   vT2 = new Vector<PPHM>(sup.gT2());
+   vT2 = new BlockVector<PPHM>(sup.gT2());
 #endif
 
 }
@@ -41,22 +41,22 @@ EIG::EIG(SUP &sup){
  */
 EIG::EIG(const EIG &eig_c){
 
-   vI = new Vector<TPM>(eig_c.gvI());
+   vI = new BlockVector<TPM>(eig_c.gvI());
 
 #ifdef __Q_CON
-   vQ = new Vector<TPM>(eig_c.gvQ());
+   vQ = new BlockVector<TPM>(eig_c.gvQ());
 #endif
 
 #ifdef __G_CON
-   vG = new Vector<PHM>(eig_c.gvG());
+   vG = new BlockVector<PHM>(eig_c.gvG());
 #endif
 
 #ifdef __T1_CON
-   vT1 = new Vector<DPM>(eig_c.gvT1());
+   vT1 = new BlockVector<DPM>(eig_c.gvT1());
 #endif
 
 #ifdef __T2_CON
-   vT2 = new Vector<PPHM>(eig_c.gvT2());
+   vT2 = new BlockVector<PPHM>(eig_c.gvT2());
 #endif
 
 }
@@ -139,10 +139,10 @@ ostream &operator<<(ostream &output,const EIG &eig_p){
 }
 
 /** 
- * get the Vector<TPM> object containing the eigenvalues of the TPM block I
- * @return a Vector<TPM> object containing the desired eigenvalues
+ * get the BlockVector<TPM> object containing the eigenvalues of the TPM block I
+ * @return a BlockVector<TPM> object containing the desired eigenvalues
  */
-Vector<TPM> &EIG::gvI(){
+BlockVector<TPM> &EIG::gvI(){
 
    return *vI;
 
@@ -150,10 +150,10 @@ Vector<TPM> &EIG::gvI(){
 
 /** 
  * const version
- * get the Vector<TPM> object containing the eigenvalues of the TPM block I
- * @return a Vector<TPM> object containing the desired eigenvalues
+ * get the BlockVector<TPM> object containing the eigenvalues of the TPM block I
+ * @return a BlockVector<TPM> object containing the desired eigenvalues
  */
-const Vector<TPM> &EIG::gvI() const{
+const BlockVector<TPM> &EIG::gvI() const{
 
    return *vI;
 
@@ -162,10 +162,10 @@ const Vector<TPM> &EIG::gvI() const{
 #ifdef __Q_CON
 
 /** 
- * get the Vector<TPM> object containing the eigenvalues of the TPM block Q
- * @return a Vector<TPM> object containing the desired eigenvalues
+ * get the BlockVector<TPM> object containing the eigenvalues of the TPM block Q
+ * @return a BlockVector<TPM> object containing the desired eigenvalues
  */
-Vector<TPM> &EIG::gvQ(){
+BlockVector<TPM> &EIG::gvQ(){
 
    return *vQ;
 
@@ -173,10 +173,10 @@ Vector<TPM> &EIG::gvQ(){
 
 /** 
  * const version
- * get the Vector<TPM> object containing the eigenvalues of the TPM block Q
- * @return a Vector<TPM> object containing the desired eigenvalues
+ * get the BlockVector<TPM> object containing the eigenvalues of the TPM block Q
+ * @return a BlockVector<TPM> object containing the desired eigenvalues
  */
-const Vector<TPM> &EIG::gvQ() const{
+const BlockVector<TPM> &EIG::gvQ() const{
 
    return *vQ;
 
@@ -187,20 +187,20 @@ const Vector<TPM> &EIG::gvQ() const{
 #ifdef __G_CON
 
 /** 
- * get the Vector<PHM> object containing the eigenvalues of the PHM block G
- * @return a Vector<PHM> object containing the desired eigenvalues
+ * get the BlockVector<PHM> object containing the eigenvalues of the PHM block G
+ * @return a BlockVector<PHM> object containing the desired eigenvalues
  */
-Vector<PHM> &EIG::gvG(){
+BlockVector<PHM> &EIG::gvG(){
 
    return *vG;
 
 }
 
 /** 
- * get the Vector<PHM> object containing the eigenvalues of the PHM block G, const version
- * @return a Vector<PHM> object containing the desired eigenvalues
+ * get the BlockVector<PHM> object containing the eigenvalues of the PHM block G, const version
+ * @return a BlockVector<PHM> object containing the desired eigenvalues
  */
-const Vector<PHM> &EIG::gvG() const{
+const BlockVector<PHM> &EIG::gvG() const{
 
    return *vG;
 
@@ -211,20 +211,20 @@ const Vector<PHM> &EIG::gvG() const{
 #ifdef __T1_CON
 
 /** 
- * get the Vector<DPM> object containing the eigenvalues of the DPM block T1 of the SUP matrix
- * @return a Vector<DPM> object containing the desired eigenvalues
+ * get the BlockVector<DPM> object containing the eigenvalues of the DPM block T1 of the SUP matrix
+ * @return a BlockVector<DPM> object containing the desired eigenvalues
  */
-Vector<DPM> &EIG::gvT1(){
+BlockVector<DPM> &EIG::gvT1(){
 
    return *vT1;
 
 }
 
 /** 
- * get the Vector<DPM> object containing the eigenvalues of the DPM block T1 of the SUP matrix, const version
- * @return a Vector<DPM> object containing the desired eigenvalues
+ * get the BlockVector<DPM> object containing the eigenvalues of the DPM block T1 of the SUP matrix, const version
+ * @return a BlockVector<DPM> object containing the desired eigenvalues
  */
-const Vector<DPM> &EIG::gvT1() const{
+const BlockVector<DPM> &EIG::gvT1() const{
 
    return *vT1;
 
@@ -235,20 +235,20 @@ const Vector<DPM> &EIG::gvT1() const{
 #ifdef __T2_CON
 
 /** 
- * get the Vector<PPHM> object containing the eigenvalues of the PPHM block T2 of the SUP matrix
- * @return a Vector<PPHM> object containing the desired eigenvalues
+ * get the BlockVector<PPHM> object containing the eigenvalues of the PPHM block T2 of the SUP matrix
+ * @return a BlockVector<PPHM> object containing the desired eigenvalues
  */
-Vector<PPHM> &EIG::gvT2(){
+BlockVector<PPHM> &EIG::gvT2(){
 
    return *vT2;
 
 }
 
 /** 
- * get the Vector<PPHM> object containing the eigenvalues of the PPHM block T2 of the SUP matrix, const version
- * @return a Vector<PPHM> object containing the desired eigenvalues
+ * get the BlockVector<PPHM> object containing the eigenvalues of the PPHM block T2 of the SUP matrix, const version
+ * @return a BlockVector<PPHM> object containing the desired eigenvalues
  */
-const Vector<PPHM> &EIG::gvT2() const{
+const BlockVector<PPHM> &EIG::gvT2() const{
 
    return *vT2;
 

@@ -33,23 +33,43 @@ ostream &operator<<(ostream &output,const SPM &spm_p){
 }
 
 /**
- * construct the SPM object by tracing out one pair of indices from a TPM object
- * @param tpm input TPM object
+ * Trace out a set of indices to create the "bar" matrix of a TPM
+ * @param scale the factor u want the SPM to be scaled with (1/N-1 for normal sp density matrix)
+ * @param tpm the TPM out of which the SPM will be filled
  */
 void SPM::bar(double scale,const TPM &tpm){
 
+   //hulpvariabele
+   double ward;
+
    for(int a = 0;a < Tools::gM();++a)
-      for(int b = a;b < Tools::gM();++b){
+      for(int c = a;c < Tools::gM();++c){
 
-         (*this)(a,b) = 0.0;
+         (*this)(a,c) = 0.0;
 
-         for(int c = 0;c < Tools::gM();++c)
-            (*this)(a,b) += tpm(a,c,b,c);
+         for(int b = 0;b < Tools::gM();++b){
 
-         (*this)(a,b) *= scale;
+            //S = 0 stuk
+            ward = tpm(0,a,b,c,b);
+
+            if(a == b)
+               ward *= std::sqrt(2.0);
+
+            if(c == b)
+               ward *= std::sqrt(2.0);
+
+            (*this)(a,c) += ward;
+
+            //S = 1 stuk: hier kan nooit a = b en c = d wegens antisymmetrie
+            (*this)(a,c) += 3.0*tpm(1,a,b,c,b);
+
+         }
+
+         //nog schalen
+         (*this)(a,c) *= 0.5*scale;
 
       }
-   
+
    this->symmetrize();
 
 }

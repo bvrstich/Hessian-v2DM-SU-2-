@@ -34,7 +34,7 @@ int main(void) {
 
    cout.precision(10);
 
-   const int M = 8;//dim sp hilbert space
+   const int M = 4;//dim sp hilbert space
    const int N = 4;//nr of particles
 
    Tools::init(M,N);
@@ -50,7 +50,7 @@ int main(void) {
    TPM ham;
 
    //the zero is for pbc's
-   ham.hubbard(0,1.0);
+   ham.hubbard(1.0);
 
    TPM rdm;
    rdm.unit();

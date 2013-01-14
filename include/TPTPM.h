@@ -46,13 +46,13 @@ class TPTPM : public Matrix {
       double operator()(int a,int b,int c,int d,int e,int z,int t,int h) const;
 
       //access to the numbers in tp mode
-      double operator()(int I,int J,int K,int L) const;
+      double operator()(int S,int I,int J,int S_,int K,int L) const;
 
       static int gn();
 
       static int gtpmm2t(int,int);
 
-      static int gt2tpmm(int,int);
+      static int gt2tpmm(int,int,int);
 
       static double gnorm(int,int);
  
@@ -66,7 +66,7 @@ class TPTPM : public Matrix {
       static vector< vector<int> > tpmm2t;
 
       //!list relating the single-particle space to the TPTPM basis
-      static int **t2tpmm;
+      static int ***t2tpmm;
 
 };
 

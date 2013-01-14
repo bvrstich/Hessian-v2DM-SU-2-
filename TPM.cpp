@@ -1,50 +1,77 @@
 #include <iostream>
 #include <cmath>
 #include <fstream>
-#include <vector>
 
 using std::ostream;
 using std::ofstream;
 using std::ifstream;
-using std::vector;
 using std::cout;
 using std::endl;
 using std::ios;
 
 #include "include.h"
 
-int **TPM::s2t;
-vector< vector<int> > TPM::t2s;
+vector< vector<int> > *TPM::t2s;
+int ***TPM::s2t;
 
 /**
- * initialize the static lists
+ * construct the static lists
  */
 void TPM::init(){
 
-   //allocatie van sp2tp
-   s2t = new int * [Tools::gM()];
-   s2t[0] = new int [Tools::gM()*Tools::gM()];
+   int M = Tools::gM();
 
-   for(int i = 1;i < Tools::gM();++i)
-      s2t[i] = s2t[i - 1] + Tools::gM();
+   //allocatie van s2t
+   s2t = new int ** [2];
+
+   for(int S = 0;S < 2;++S){
+
+      s2t[S] = new int * [M];
+
+      for(int a = 0;a < M;++a)
+         s2t[S][a] = new int [M];
+
+   }
+
+   t2s = new vector< vector<int> > [2];
 
    vector<int> v(2);
 
-   //initialisatie van de twee arrays
-   int t = 0;
+   //initialisatie van de arrays
+   int tp = 0;
 
-   for(int a = 0;a < Tools::gM();++a)
-      for(int b = a + 1;b < Tools::gM();++b){
+   //symmetrical array: S = 0
+   for(int a = 0;a < M;++a)
+      for(int b = a;b < M;++b){
 
          v[0] = a;
          v[1] = b;
 
-         t2s.push_back(v);
+         t2s[0].push_back(v);
 
-         s2t[a][b] = t;
-         s2t[b][a] = s2t[a][b];
+         s2t[0][a][b] = tp;
+         s2t[0][b][a] = tp;
 
-         ++t;
+         ++tp;
+
+      }
+
+   //watch it!
+   tp = 0;
+
+   //antisymmetrical array: S = 1
+   for(int a = 0;a < M;++a)
+      for(int b = a + 1;b < M;++b){
+
+         v[0] = a;
+         v[1] = b;
+
+         t2s[1].push_back(v);
+
+         s2t[1][a][b] = tp;
+         s2t[1][b][a] = tp;
+
+         ++tp;
 
       }
 
@@ -55,53 +82,87 @@ void TPM::init(){
  */
 void TPM::clear(){
 
-   delete [] s2t[0];
+   int M = Tools::gM();
+
+   for(int S = 0;S < 2;++S){
+
+      for(int a = 0;a < M;++a)
+         delete [] s2t[S][a];
+
+      delete [] s2t[S];
+
+   }
+   
    delete [] s2t;
+
+   delete [] t2s;
 
 }
 
 /**
- * standard constructor: constructs Matrix object of dimension M*(M - 1)/2 and
+ * standard constructor for a spinsymmetrical tp matrix: constructs BlockMatrix object with 2 blocks, for S = 0 or 1,
+ * @param M nr of sp orbitals
+ * @param N nr of particles
  */
-TPM::TPM() : Matrix(t2s.size()) { }
+TPM::TPM() : BlockMatrix(2) {
+
+   //set the dimension and degeneracy of the two blocks:
+   this->setMatrixDim(0,t2s[0].size(),1);
+   this->setMatrixDim(1,t2s[1].size(),3);
+
+}
 
 /**
  * copy constructor: constructs Matrix object of dimension M*(M - 1)/2 and fills it with the content of matrix tpm_c
  * @param tpm_c object that will be copied into this.
  */
-TPM::TPM(const TPM &tpm_c) : Matrix(tpm_c){ }
+TPM::TPM(const TPM &tpm_c) : BlockMatrix(tpm_c){ }
 
 /**
- * destructor
+ * destructor: if counter == 1 the memory for the static lists t2s en s2t will be deleted.
+ * 
  */
 TPM::~TPM(){ }
 
 /**
- * access the elements of the matrix in sp mode, antisymmetry is automatically accounted for:\n\n
- * TPM(a,b,c,d) = -TPM(b,a,c,d) = -TPM(a,b,d,c) = TPM(b,a,c,d)
- * @param a first sp index that forms the tp row index i together with b
- * @param b second sp index that forms the tp row index i together with a
- * @param c first sp index that forms the tp column index j together with d
- * @param d second sp index that forms the tp column index j together with c
- * @return the number on place TPM(i,j) with the right phase.
+ * access the elements of the the blocks in sp mode, the symmetry or antisymmetry of the blocks is automatically accounted for:\n\n
+ * Antisymmetrical for S = 1, symmetrical in the sp orbitals for S = 0\n\n
+ * @param S The spinquantumnumber that identifies the block
+ * @param a first sp index that forms the tp row index i of spin S, together with b
+ * @param b second sp index that forms the tp row index i of spin S, together with a
+ * @param c first sp index that forms the tp column index j of spin S, together with d
+ * @param d second sp index that forms the tp column index j of spin S, together with c
+ * @return the number on place TPM(B,i,j) with the right phase.
  */
-double TPM::operator()(int a,int b,int c,int d) const{
+double TPM::operator()(int S,int a,int b,int c,int d) const{
 
-   if( (a == b) || (c == d) )
-      return 0;
+   if(S == 0){
+
+      int i = s2t[0][a][b];
+      int j = s2t[0][c][d];
+
+      return (*this)(S,i,j);
+
+   }
    else{
 
-      int i = s2t[a][b];
-      int j = s2t[c][d];
+      if( (a == b) || (c == d) )
+         return 0;
+      else{
 
-      int phase = 1;
+         int i = s2t[1][a][b];
+         int j = s2t[1][c][d];
 
-      if(a > b)
-         phase *= -1;
-      if(c > d)
-         phase *= -1;
+         int phase = 1;
 
-      return phase*(*this)(i,j);
+         if(a > b)
+            phase *= -1;
+         if(c > d)
+            phase *= -1;
+
+         return phase*(*this)(S,i,j);
+
+      }
 
    }
 
@@ -109,74 +170,84 @@ double TPM::operator()(int a,int b,int c,int d) const{
 
 ostream &operator<<(ostream &output,const TPM &tpm_p){
 
-   for(int i = 0;i < tpm_p.gn();++i)
-      for(int j = 0;j < tpm_p.gn();++j){
+   for(int S = 0;S < 2;++S){
 
-         output << i << "\t" << j << "\t|\t" << tpm_p.t2s[i][0] << "\t" << tpm_p.t2s[i][1]
+      output << S << "\t" << tpm_p.gdim(S) << "\t" << tpm_p.gdeg(S) << std::endl;
+      output << std::endl;
 
-            << "\t" << tpm_p.t2s[j][0] << "\t" << tpm_p.t2s[j][1] << "\t" << tpm_p(i,j) << endl;
+      for(int i = 0;i < tpm_p.gdim(S);++i)
+         for(int j = 0;j < tpm_p.gdim(S);++j){
 
-      }
+            output << i << "\t" << j << "\t|\t" << tpm_p.t2s[S][i][0] << "\t" << tpm_p.t2s[S][i][1]
+
+               << "\t" << tpm_p.t2s[S][j][0] << "\t" << tpm_p.t2s[S][j][1] << "\t" << tpm_p(S,i,j) << endl;
+
+         }
+
+      std::cout << std::endl;
+
+   }
 
    return output;
 
 }
 
 /**
- * construct the hubbard hamiltonian with on site repulsion U
+ * construct the spinsymmetrical hubbard hamiltonian with on site repulsion U
  * @param U onsite repulsion term
- * @param option == 0 use periodic boundary conditions, == 1 use no pbc
  */
-void TPM::hubbard(int option,double U){
+void TPM::hubbard(double U){
 
-   int a,b,c,d;//sp orbitals
+   int N = Tools::gN();
+   int M = Tools::gM();
 
-   double ward = 1.0/(Tools::gN() - 1.0);
+   int a,b,c,d;//sp (lattice sites here) orbitals
 
-   for(int i = 0;i < gn();++i){
+   double ward = 1.0/(N - 1.0);
 
-      a = t2s[i][0];
-      b = t2s[i][1];
+   int sign;
 
-      for(int j = i;j < gn();++j){
+   for(int S = 0;S < 2;++S){
 
-         c = t2s[j][0];
-         d = t2s[j][1];
+      sign = 1 - 2*S;
 
-         (*this)(i,j) = 0;
+      for(int i = 0;i < this->gdim(S);++i){
 
-         if(option == 0){//pbc
+         a = t2s[S][i][0];
+         b = t2s[S][i][1];
 
-            //eerst hopping
-            if( (a == c) && ( ( (b + 2)%Tools::gM() == d ) || ( b == (d + 2)%Tools::gM() ) ) )
-               (*this)(i,j) -= ward;
+         for(int j = i;j < this->gdim(S);++j){
 
-            if( (b == c) && ( ( (a + 2)%Tools::gM() == d ) || ( a == (d + 2)%Tools::gM() ) ) )
-               (*this)(i,j) += ward;
+            c = t2s[S][j][0];
+            d = t2s[S][j][1];
 
-            if( (b == d) && ( ( (a + 2)%Tools::gM() == c ) || ( a == (c + 2)%Tools::gM() ) ) )
-               (*this)(i,j) -= ward;
-
-         }
-         else{//no pbc
+            (*this)(S,i,j) = 0;
 
             //eerst hopping
-            if( (a == c) && ( ( (b + 2) == d ) || ( b == (d + 2) ) ) )
-               (*this)(i,j) -= ward;
+            if( (a == c) && ( ( (b + 1)%M == d ) || ( b == (d + 1)%M ) ) )
+               (*this)(S,i,j) -= ward;
 
-            if( (b == c) && ( ( (a + 2) == d ) || ( a == (d + 2) ) ) )
-               (*this)(i,j) += ward;
+            if( (b == c) && ( ( (a + 1)%M == d ) || ( a == (d + 1)%M ) ) )
+               (*this)(S,i,j) -= sign*ward;
 
-            if( (b == d) && ( ( (a + 2) == c ) || ( a == (c + 2) ) ) )
-               (*this)(i,j) -= ward;
+            if( (a == d) && ( ( (b + 1)%M == c ) || ( b == (c + 1)%M ) ) )
+               (*this)(S,i,j) -= sign*ward;
+
+            if( (b == d) && ( ( (a + 1)%M == c ) || ( a == (c + 1)%M ) ) )
+               (*this)(S,i,j) -= ward;
+
+            //only on-site interaction for singlet tp states:
+            if(S == 0)
+               if(i == j && a == b)
+                  (*this)(S,i,j) += 2.0*U;
+
+            if(a == b)
+               (*this)(S,i,j) /= std::sqrt(2.0);
+
+            if(c == d)
+               (*this)(S,i,j) /= std::sqrt(2.0);
 
          }
-
-         //on site interaction
-         if( (a % 2) == 0 && (c % 2) == 0 )
-            if(a == (b - 1) && c == (d - 1) && a == c)
-               (*this)(i,j) += U;
-
       }
 
    }
@@ -186,7 +257,7 @@ void TPM::hubbard(int option,double U){
 }
 
 /**
- * The Q map
+ * The spincoupled Q map
  * @param option = 1, regular Q map , = -1 inverse Q map
  * @param tpm_d the TPM of which the Q map is taken and saved in this.
  */
@@ -201,7 +272,7 @@ void TPM::Q(int option,const TPM &tpm_d){
 }
 
 /**
- * The Q-like map: see primal-dual.pdf for more info (form: Q(A,B,C)(TPM) )
+ * The spincoupled Q-like map: see primal-dual.pdf for more info (form: Q^S(A,B,C)(TPM) )
  * @param option = 1, regular Q-like map , = -1 inverse Q-like map
  * @param A factor in front of the two particle piece of the map
  * @param B factor in front of the no particle piece of the map
@@ -210,47 +281,81 @@ void TPM::Q(int option,const TPM &tpm_d){
  */
 void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
 
+   int M = Tools::gM();
+
+   //for inverse
    if(option == -1){
 
-      B = (B*A + B*C*Tools::gM() - 2.0*C*C)/( A * (C*(Tools::gM() - 2.0) -  A) * ( A + B*Tools::gM()*(Tools::gM() - 1.0) - 2.0*C*(Tools::gM() - 1.0) ) );
-      C = C/(A*(C*(Tools::gM() - 2.0) - A));
+      B = (B*A + 2.0*B*C*M - 2.0*C*C)/( A * (2.0*C*(M - 1.0) -  A) * ( A + 2.0*B*M*(2.0*M - 1.0) - 2.0*C*(2.0*M - 1.0) ) );
+      C = C/(A*(2.0*C*(M - 1.0) - A));
       A = 1.0/A;
 
    }
 
    SPM spm;
+   spm.bar(C,tpm_d);
 
    //de trace*2 omdat mijn definitie van trace in berekeningen over alle (alpha,beta) loopt
    double ward = B*tpm_d.trace()*2.0;
 
-   //construct de spm met schaling C
-   spm.bar(C,tpm_d);
+   int sign;
 
-   for(int i = 0;i < gn();++i){
+   double norm;
 
-      int a = t2s[i][0];
-      int b = t2s[i][1];
+   //loop over the spinblocks
+   for(int S = 0;S < 2;++S){
 
-      for(int j = i;j < gn();++j){
+      //symmetry or antisymmetry?
+      sign = 1 - 2*S;
 
-         int c = t2s[j][0];
-         int d = t2s[j][1];
+      for(int i = 0;i < this->gdim(S);++i){
 
-         (*this)(i,j) = A*tpm_d(i,j);
+         int a = t2s[S][i][0];
+         int b = t2s[S][i][1];
 
-         if(i == j)
-            (*this)(i,i) += ward;
+         for(int j = i;j < this->gdim(S);++j){
 
-         if(a == c)
-            (*this)(i,j) -= spm(b,d);
+            int c = t2s[S][j][0];
+            int d = t2s[S][j][1];
 
-         if(b == c)
-            (*this)(i,j) += spm(a,d);
+            //determine the norm for the basisset
+            norm = 1.0;
 
-         if(b == d)
-            (*this)(i,j) -= spm(a,c);
+            if(S == 0){
 
+               if(a == b)
+                  norm /= std::sqrt(2.0);
+
+               if(c == d)
+                  norm /= std::sqrt(2.0);
+
+            }
+
+            //here starts the Q-map
+
+            //the tp part
+            (*this)(S,i,j) = A*tpm_d(S,i,j);
+
+            //the np part
+            if(i == j)
+               (*this)(S,i,i) += ward;
+
+            //and four sp parts:
+            if(a == c)
+               (*this)(S,i,j) -= norm*spm(b,d);
+
+            if(b == c)
+               (*this)(S,i,j) -= sign*norm*spm(a,d);
+
+            if(a == d)
+               (*this)(S,i,j) -= sign*norm*spm(b,c);
+
+            if(b == d)
+               (*this)(S,i,j) -= norm*spm(a,c);
+
+         }
       }
+
    }
 
    this->symmetrize();
@@ -262,61 +367,54 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
  */
 void TPM::unit(){
 
-   double ward = Tools::gN()*(Tools::gN() - 1.0)/(Tools::gM() * (Tools::gM() - 1.0));
+   double ward = Tools::gN()*(Tools::gN() - 1.0)/(2.0*Tools::gM()*(2.0*Tools::gM() - 1.0));
 
-   for(int i = 0;i < gn();++i){
+   for(int S = 0;S < 2;++S){
 
-      (*this)(i,i) = ward;
+      for(int i = 0;i < this->gdim(S);++i){
 
-      for(int j = i + 1;j < gn();++j)
-         (*this)(i,j) = (*this)(j,i) = 0.0;
+         (*this)(S,i,i) = ward;
 
+         for(int j = i + 1;j < this->gdim(S);++j)
+            (*this)(S,i,j) = (*this)(S,j,i) = 0.0;
+
+      }
    }
 
 }
 
 /**
- * orthogonal projection onto the space of traceless matrices
+ * fill the TPM object with the S^2 matrix
  */
-void TPM::proj_Tr(){
+void TPM::set_S_2(){
 
-   double ward = 2.0 * (this->trace())/(double)(Tools::gM() * (Tools::gM() - 1.0));
+   *this = 0.0;
 
-   for(int i = 0;i < gn();++i)
-      (*this)(i,i) -= ward;
+   for(int i = 0;i < this->gdim(0);++i)
+      (*this)(0,i,i) = -1.5 * (Tools::gN() - 2.0)/(Tools::gN() - 1.0);
+
+   for(int i = 0;i < this->gdim(1);++i)
+      (*this)(1,i,i) = -1.5 * (Tools::gN() - 2.0)/(Tools::gN() - 1.0) + 2.0;
 
 }
 
 /**
- * Deduct the unitmatrix times a constant (scale) from this.\n\n
- * this -= scale* 1
- * @param scale the constant
+ * convert a 2DM object from vector to matrix/TPM form
+ * @param grad input Gradient object
  */
-void TPM::min_unit(double scale){
+void TPM::convert(const Gradient &grad){
 
-   for(int i = 0;i < gn();++i)
-      (*this)(i,i) -= scale;
+   int tpmm;
 
-}
+   for(int S = 0;S < 2;++S)
+      for(int i = 0;i < gdim(S);++i)
+         for(int j = i;j < gdim(S);++j){
 
-void TPM::in_sp(const char *filename){
+            tpmm = TPTPM::gt2tpmm(S,i,j);
 
-   ifstream input(filename);
+            (*this)(S,i,j) = grad[tpmm]/ ( 2.0 * Gradient::gnorm(tpmm) * (2.0 * S + 1.0) );
 
-   double value;
-
-   int a,b,c,d;
-
-   int i,j;
-
-   while(input >> a >> b >> c >> d >> value){
-
-      i = s2t[a][b];
-      j = s2t[c][d];
-
-      (*this)(i,j) = value;
-
-   }
+         }
 
    this->symmetrize();
 
@@ -329,7 +427,7 @@ void TPM::in_sp(const char *filename){
  * @param ham Hamiltonian of the problem
  * @return the steplength
  */
-double TPM::line_search(double t,SUP &P,const TPM &ham){
+double TPM::line_search(double t,SUP &P,TPM &ham){
 
    double tolerance = 1.0e-5*t;
 
@@ -381,10 +479,10 @@ double TPM::line_search(double t,SUP &P,const TPM &ham){
  * @param ham Hamiltonian of the problem
  * @return the steplength
  */
-double TPM::line_search(double t,const TPM &rdm,const TPM &ham){
+double TPM::line_search(double t,TPM &rdm,TPM &ham){
 
    SUP P;
-
+ 
    P.fill(rdm);
 
    P.invert();
@@ -394,128 +492,28 @@ double TPM::line_search(double t,const TPM &rdm,const TPM &ham){
 }
 
 /**
- * @return the expectation value of the size of the spin: S^2
+ * @return The expectation value of the total spin for the TPM.
  */
 double TPM::S_2() const{
 
-   //first diagonal elements:
-   int a,b;
-   double s_a,s_b;
-
    double ward = 0.0;
 
-   for(int i = 0;i < gn();++i){
+   for(int i = 0;i < this->gdim(0);++i)
+      ward += -1.5 * (Tools::gN() - 2.0)/(Tools::gN() - 1.0) * (*this)(0,i,i);
 
-      a = t2s[i][0];
-      b = t2s[i][1];
-
-      s_a = ( 1.0 - 2 * (a % 2) )/2;
-      s_b = ( 1.0 - 2 * (b % 2) )/2;
-
-      ward += ( (1 + s_a*s_a + s_b*s_b)/(Tools::gN() - 1.0) + 2*s_a*s_b ) * (*this)(i,i);
-
-   }
-
-   //then the off diagonal elements: a and b are sp indices
-   for(int a = 0;a < Tools::gM()/2;++a)
-      for(int b = 0;b < Tools::gM()/2;++b)
-         ward += (*this)(2*a,2*b + 1,2*a + 1,2*b);
+   for(int i = 0;i < this->gdim(1);++i)
+      ward += 3.0 * ( -1.5 * (Tools::gN() - 2.0)/(Tools::gN() - 1.0) + 2.0 ) * (*this)(1,i,i);
 
    return ward;
 
 }
 
 /**
- * fill the TPM object with the S^2 matrix
+ * @return the dimension associated with block 'S'
+ * @param S the blockindex S
  */
-void TPM::set_S_2(){
+int TPM::gdim(int S){
 
-   int a,b,c,d;
-
-   double s_a,s_b;
-
-   for(int i = 0;i < gn();++i){
-
-      a = t2s[i][0];
-      b = t2s[i][1];
-
-      for(int j = i;j < gn();++j){
-
-         c = t2s[j][0];
-         d = t2s[j][1];
-
-         //init
-         (*this)(i,j) = 0.0;
-
-         if(i == j){//diagonal stuff
-
-            s_a = ( 1.0 - 2 * (a % 2) )/2;
-            s_b = ( 1.0 - 2 * (b % 2) )/2;
-
-            (*this)(i,i) = (1 + s_a*s_a + s_b*s_b)/(Tools::gN() - 1.0) + 2*s_a*s_b;
-
-            if(a/2 == b/2 && a % 2 == 0 && b % 2 == 1)
-               (*this)(i,i) -= 1.0;
-
-         }
-
-         //then the off-diagonal elements
-         if(a % 2 == 0 && b % 2 == 1 && a/2 != b/2)//a up and b down
-            if(a + 1 == c && b == d + 1)
-               (*this)(i,j) += 1.0;
-
-      }
-
-   }
-
-   this->symmetrize();
-
-}
-
-/**
- * @return the dimension of a TPM matrix
- */
-int TPM::gn(){
-
-   return t2s.size();
-
-}
-
-/**
- * convert a TPTPV object to a 2DM
- * @param tpvv the TPTPV object
- */
-void TPM::convert(const Gradient &grad){
-
-   int tpmm_i;
-
-   for(int i = 0;i < gn();++i)
-      for(int j = i;j < gn();++j){
-
-         tpmm_i = TPTPM::gt2tpmm(i,j);
-
-         (*this)(i,j) = grad[tpmm_i]/(2.0*Gradient::gnorm(tpmm_i));
-
-      }
-
-   this->symmetrize();
-
-}
-
-/**
- * access to the lists from outside the class
- */
-int TPM::gt2s(int i,int option){
-
-   return t2s[i][option];
-
-}
-
-/**
- * access to the lists from outside the class
- */
-int TPM::gs2t(int a,int b){
-
-   return s2t[a][b];
+   return t2s[S].size();
 
 }
