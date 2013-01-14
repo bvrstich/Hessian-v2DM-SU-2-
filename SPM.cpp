@@ -39,9 +39,6 @@ ostream &operator<<(ostream &output,const SPM &spm_p){
  */
 void SPM::bar(double scale,const TPM &tpm){
 
-   //hulpvariabele
-   double ward;
-
    for(int a = 0;a < Tools::gM();++a)
       for(int c = a;c < Tools::gM();++c){
 
@@ -50,15 +47,7 @@ void SPM::bar(double scale,const TPM &tpm){
          for(int b = 0;b < Tools::gM();++b){
 
             //S = 0 stuk
-            ward = tpm(0,a,b,c,b);
-
-            if(a == b)
-               ward *= std::sqrt(2.0);
-
-            if(c == b)
-               ward *= std::sqrt(2.0);
-
-            (*this)(a,c) += ward;
+            (*this)(a,c) += tpm(0,a,b,c,b)/(TPM::gnorm(a,b)*TPM::gnorm(c,b));
 
             //S = 1 stuk: hier kan nooit a = b en c = d wegens antisymmetrie
             (*this)(a,c) += 3.0*tpm(1,a,b,c,b);

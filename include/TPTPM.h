@@ -42,9 +42,6 @@ class TPTPM : public Matrix {
 
       using Matrix::operator();
 
-      //easy to access the numbers, in sp mode
-      double operator()(int a,int b,int c,int d,int e,int z,int t,int h) const;
-
       //access to the numbers in tp mode
       double operator()(int S,int I,int J,int S_,int K,int L) const;
 

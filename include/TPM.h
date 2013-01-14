@@ -79,6 +79,8 @@ class TPM : public BlockMatrix {
 
       static void clear();
 
+      static double gnorm(int,int);
+
       static int gt2s(int,int,int);
 
       static int gs2t(int,int,int);
@@ -92,6 +94,8 @@ class TPM : public BlockMatrix {
 
       //!static list of dimension [2][M/2][M/2] that takes two sp indices a,b and a spinquantumnumber S, and returns a tp index i: i = s2t[S][a][b]
       static int ***s2t;
+
+      static double **norm;
 
 };
 

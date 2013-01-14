@@ -389,3 +389,13 @@ void BlockMatrix::out(const char *filename) const{
    output << *this;
 
 }
+
+/**
+ * take the square of a symmetric blockmatrix
+ */
+void BlockMatrix::squaresym(const BlockMatrix &mat){
+
+   for(int i = 0;i < nr;++i)
+      blockmatrix[i]->squaresym(mat[i]);
+
+}

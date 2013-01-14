@@ -14,6 +14,8 @@ using std::ios;
 vector< vector<int> > *TPM::t2s;
 int ***TPM::s2t;
 
+double **TPM::norm;
+
 /**
  * construct the static lists
  */
@@ -35,6 +37,11 @@ void TPM::init(){
 
    t2s = new vector< vector<int> > [2];
 
+   norm = new double * [M];
+
+   for(int a = 0;a < M;++a)
+      norm[a] = new double [M];
+
    vector<int> v(2);
 
    //initialisatie van de arrays
@@ -51,6 +58,13 @@ void TPM::init(){
 
          s2t[0][a][b] = tp;
          s2t[0][b][a] = tp;
+
+         if(a == b)
+            norm[a][b] = 1.0/(std::sqrt(2.0));
+         else
+            norm[a][b] = 1.0;
+
+         norm[b][a] = norm[a][b];
 
          ++tp;
 
@@ -96,6 +110,11 @@ void TPM::clear(){
    delete [] s2t;
 
    delete [] t2s;
+
+   for(int a = 0;a < M;++a)
+      delete [] norm[a];
+
+   delete [] norm;
 
 }
 
@@ -241,11 +260,7 @@ void TPM::hubbard(double U){
                if(i == j && a == b)
                   (*this)(S,i,j) += 2.0*U;
 
-            if(a == b)
-               (*this)(S,i,j) /= std::sqrt(2.0);
-
-            if(c == d)
-               (*this)(S,i,j) /= std::sqrt(2.0);
+            (*this)(S,i,j) *= norm[a][b] * norm[c][d];
 
          }
       }
@@ -300,8 +315,6 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
 
    int sign;
 
-   double norm;
-
    //loop over the spinblocks
    for(int S = 0;S < 2;++S){
 
@@ -318,19 +331,6 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
             int c = t2s[S][j][0];
             int d = t2s[S][j][1];
 
-            //determine the norm for the basisset
-            norm = 1.0;
-
-            if(S == 0){
-
-               if(a == b)
-                  norm /= std::sqrt(2.0);
-
-               if(c == d)
-                  norm /= std::sqrt(2.0);
-
-            }
-
             //here starts the Q-map
 
             //the tp part
@@ -342,16 +342,16 @@ void TPM::Q(int option,double A,double B,double C,const TPM &tpm_d){
 
             //and four sp parts:
             if(a == c)
-               (*this)(S,i,j) -= norm*spm(b,d);
+               (*this)(S,i,j) -= norm[a][b] * norm[c][d] * spm(b,d);
 
             if(b == c)
-               (*this)(S,i,j) -= sign*norm*spm(a,d);
+               (*this)(S,i,j) -= sign * norm[a][b] * norm[c][d] * spm(a,d);
 
             if(a == d)
-               (*this)(S,i,j) -= sign*norm*spm(b,c);
+               (*this)(S,i,j) -= sign * norm[a][b] * norm[c][d] * spm(b,c);
 
             if(b == d)
-               (*this)(S,i,j) -= norm*spm(a,c);
+               (*this)(S,i,j) -= norm[a][b] * norm[c][d] * spm(a,c);
 
          }
       }
@@ -515,5 +515,14 @@ double TPM::S_2() const{
 int TPM::gdim(int S){
 
    return t2s[S].size();
+
+}
+
+/**
+ * access to the TPM norms from outside the class
+ */
+double TPM::gnorm(int a,int b){
+
+   return norm[a][b];
 
 }

@@ -123,3 +123,20 @@ void Hessian::lagr(){
    }
 
 }
+
+/**
+ * construct the Q part of the hessian
+ */
+void Hessian::Q(const TPM &Q){
+
+   int N = Tools::gN();
+
+   TPM Q2;
+   Q2.squaresym(Q);
+
+   SPM Q2bar;
+   Q2bar.bar(4.0/(N*(N - 1.0)*(N - 1.0)),Q2);
+
+   double Q2trace = 16 * Q2.trace()/ (N*N*(N - 1.0)*(N - 1.0));
+
+}

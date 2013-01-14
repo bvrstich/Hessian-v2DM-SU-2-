@@ -163,19 +163,19 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
       gradient[i] = t * P.gI()(S,I,J) - ham(S,I,J);
 
 #ifdef __Q_CON
-      gradient[i] += t * QQ(I,J);
+      gradient[i] += t * QQ(S,I,J);
 #endif
 
 #ifdef __G_CON
-      gradient[i] += t * GG(I,J);
+      gradient[i] += t * GG(S,I,J);
 #endif
 
 #ifdef __T1_CON
-      gradient[i] += t * TT1(I,J);
+      gradient[i] += t * TT1(S,I,J);
 #endif
 
 #ifdef __T2_CON
-      gradient[i] += t * TT2(I,J);
+      gradient[i] += t * TT2(S,I,J);
 #endif
 
       gradient[i] *= 2.0 * norm[i] * (2.0*S + 1.0);
