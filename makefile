@@ -18,7 +18,6 @@ CPPSRC	= pr_sdp.cpp\
             EIG.cpp\
             TPTPM.cpp\
             Hessian.cpp\
-            TPTPV.cpp\
             Gradient.cpp\
             Newton.cpp
 

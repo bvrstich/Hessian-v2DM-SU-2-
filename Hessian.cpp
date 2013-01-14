@@ -87,7 +87,7 @@ void Hessian::I(const TPM &tpm){
          K = TPTPM::gtpmm2t(j,0);
          L = TPTPM::gtpmm2t(j,1);
 
-         (*this)(i,j) = 2.0 * ( tpm(I,K) * tpm(J,L) + tpm(I,L) * tpm(J,K) ) * TPTPV::gnorm(i) * TPTPV::gnorm(j);
+         (*this)(i,j) = 2.0 * ( tpm(I,K) * tpm(J,L) + tpm(I,L) * tpm(J,K) ) * Gradient::gnorm(i) * Gradient::gnorm(j);
 
       }
 

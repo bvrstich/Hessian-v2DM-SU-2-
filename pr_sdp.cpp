@@ -42,7 +42,7 @@ int main(void) {
    TPM::init();
 
    TPTPM::init();
-   TPTPV::init();
+   Gradient::init();
 
    Newton newton;
 
@@ -135,6 +135,7 @@ int main(void) {
    cout << endl;
    cout << "Total nr of Newton steps = " << tot_iter << endl;
 
+   Gradient::clear();
    TPTPM::clear();
 
    TPM::clear();

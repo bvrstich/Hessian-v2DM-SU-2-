@@ -46,10 +46,25 @@ class Gradient {
 
       void convert(const TPM &);
 
+      static void init();
+
+      static void clear();
+      
+      static double gnorm(int);
+
+      static double gnorm(int,int);
+
+
    private:
 
       //!vector on 2DM + lagrange multiplier space,
       double *gradient;
+
+      //!norms associated with the vector
+      static double *norm;
+
+      //!dimension of the vector
+      static int n;
 
 };
 

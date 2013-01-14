@@ -13,7 +13,6 @@ using std::vector;
 class SPM;
 class SUP;
 class Newton;
-class TPTPV;
 class Gradient;
 
 /**
@@ -85,8 +84,6 @@ class TPM : public Matrix {
       void set_S_2();
 
       void constr_sp_diag(int);
-
-      void convert(const TPTPV &);
 
       void convert(const Gradient &);
 

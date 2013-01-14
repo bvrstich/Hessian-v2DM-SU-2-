@@ -11,6 +11,43 @@ using std::ios;
 
 #include "include.h"
 
+double *Gradient::norm;
+int Gradient::n;
+
+/**
+ * initialize the static lists
+ */
+void Gradient::init(){
+
+   n = TPTPM::gn();
+
+   norm = new double [n];
+
+   int hess = 0;
+
+   for(int i = 0;i < TPM::gn();++i)
+      for(int j = i;j < TPM::gn();++j){
+
+         if(i == j)
+            norm[hess] = 0.5;
+         else
+            norm[hess] = std::sqrt(0.5);
+
+         ++hess;
+
+      }
+
+}
+
+/**
+ * deallocate the static lists
+ */
+void Gradient::clear(){
+
+   delete [] norm;
+
+}
+
 /**
  * standard constructor:
  */
@@ -136,7 +173,7 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
       gradient[i] += t * TT2(I,J);
 #endif
 
-      gradient[i] *= 2.0 * TPTPV::gnorm(i);
+      gradient[i] *= 2.0 * norm[i];
 
    }
 
@@ -158,8 +195,30 @@ void Gradient::convert(const TPM &tpm){
       I = TPTPM::gtpmm2t(i,0);
       J = TPTPM::gtpmm2t(i,1);
 
-      gradient[i] = 2.0 * TPTPV::gnorm(i) * tpm(I,J);
+      gradient[i] = 2.0 * norm[i] * tpm(I,J);
 
    }
+
+}
+
+
+/**
+ * access to the norm from outside of the class
+ * @param i hess index, if a == b norm = 1.0/sqrt(2.0)
+ */
+double Gradient::gnorm(int i){
+
+   return norm[i];
+
+}
+
+/**
+ * access to the norm from outside of the class, in tp mode
+ * @param I row index
+ * @param J column index
+ */
+double Gradient::gnorm(int I,int J){
+
+   return norm[TPTPM::gt2tpmm(I,J)];
 
 }
