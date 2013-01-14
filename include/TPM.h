@@ -14,6 +14,7 @@ class SPM;
 class SUP;
 class Newton;
 class TPTPV;
+class Gradient;
 
 /**
  * @author Brecht Verstichel
@@ -85,9 +86,9 @@ class TPM : public Matrix {
 
       void constr_sp_diag(int);
 
-      void convert(const Newton &);
-
       void convert(const TPTPV &);
+
+      void convert(const Gradient &);
 
       static int gs2t(int,int);
 

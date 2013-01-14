@@ -482,20 +482,6 @@ int TPM::gn(){
 }
 
 /**
- * convert the solution Newton object to a TPM Matrix
- * @param newton input Newton object
- */
-void TPM::convert(const Newton &newton){
-
-   for(int i = 0;i < gn();++i)
-      for(int j = i;j < gn();++j)
-         (*this)(i,j) = newton.gx(i,j)/(2.0*TPTPV::gnorm(i,j));
-
-   this->symmetrize();
-
-}
-
-/**
  * convert a TPTPV object to a 2DM
  * @param tpvv the TPTPV object
  */
@@ -509,6 +495,27 @@ void TPM::convert(const TPTPV &tpvv){
          tpmm_i = TPTPM::gt2tpmm(i,j);
 
          (*this)(i,j) = tpvv[tpmm_i]/(2.0*TPTPV::gnorm(tpmm_i));
+
+      }
+
+   this->symmetrize();
+
+}
+
+/**
+ * convert a TPTPV object to a 2DM
+ * @param tpvv the TPTPV object
+ */
+void TPM::convert(const Gradient &grad){
+
+   int tpmm_i;
+
+   for(int i = 0;i < gn();++i)
+      for(int j = i;j < gn();++j){
+
+         tpmm_i = TPTPM::gt2tpmm(i,j);
+
+         (*this)(i,j) = grad[tpmm_i]/(2.0*TPTPV::gnorm(tpmm_i));
 
       }
 

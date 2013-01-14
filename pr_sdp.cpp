@@ -88,7 +88,7 @@ int main(void) {
 
          //dit wordt de stap:
          TPM delta;
-         delta.convert(newton);
+         delta.convert(newton.gGradient());
 
          //line search
          double a = delta.line_search(t,P,ham);

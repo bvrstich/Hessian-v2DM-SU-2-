@@ -30,6 +30,8 @@ class Newton{
 
       const Hessian &gH() const;
 
+      const Gradient &gGradient() const;
+
       void construct(double,const TPM &,const SUP &);
 
    private:

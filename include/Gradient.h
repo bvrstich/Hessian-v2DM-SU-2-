@@ -6,6 +6,9 @@
 
 using std::ostream;
 
+class TPM;
+class SUP;
+
 /**
  * @author Brecht Verstichel
  * @date 12-01-2013\n\n
@@ -35,7 +38,13 @@ class Gradient {
 
       const double &operator[](int) const;
 
+      void construct(double,const TPM &,const SUP &);
+
       const double *gpointer() const;
+
+      double *gpointer();
+
+      void convert(const TPM &);
 
    private:
 
