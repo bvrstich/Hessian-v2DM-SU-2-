@@ -526,3 +526,21 @@ double TPM::gnorm(int a,int b){
    return norm[a][b];
 
 }
+
+/** 
+ * access to the lists from outside of the class
+ */
+int TPM::gt2s(int S,int i,int option){
+
+   return t2s[S][i][option];
+
+}
+
+/** 
+ * access to the lists from outside of the class
+ */
+int TPM::gs2t(int S,int a,int b){
+
+   return t2s[S][a][b];
+
+}

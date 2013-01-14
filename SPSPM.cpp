@@ -147,3 +147,82 @@ int SPSPM::gspmm2s(int i,int option){
    return spmm2s[i][option];
 
 }
+
+/**
+ * construct the doubly traced direct product of two TPM's
+ */
+void SPSPM::dpt2(double scale,const TPSPM &tpspm){
+
+   int a,c,e,t;
+
+   for(int i = 0;i < gn();++i){
+
+      a = spmm2s[i][0];
+      c = spmm2s[i][1];
+
+      for(int j = i;j < gn();++j){
+
+         e = spmm2s[j][0];
+         t = spmm2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < Tools::gM();++l){
+
+            //S = 0 part
+            (*this)(i,j) += tpspm(0,a,l,c,l,e,t)/( TPM::gnorm(a,l) * TPM::gnorm(c,l) );
+
+            //S = 1 part
+            (*this)(i,j) += 3.0 * tpspm(0,a,l,c,l,e,t);
+
+         }
+
+         (*this)(i,j) *= 0.5 * scale;
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * construct the doubly traced direct product of two TPM's
+ */
+void SPSPM::dpt2(double scale,const TPM &tpm){
+
+   int a,c,e,t;
+
+   for(int i = 0;i < gn();++i){
+
+      a = spmm2s[i][0];
+      c = spmm2s[i][1];
+
+      for(int j = i;j < gn();++j){
+
+         e = spmm2s[j][0];
+         t = spmm2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < Tools::gM();++l)
+            for(int k = 0;k < Tools::gM();++k){
+
+               //S = 0 part
+               (*this)(i,j) += (tpm(0,a,k,e,l) * tpm(0,c,k,t,l) + tpm(0,a,k,t,l) * tpm(0,c,k,e,l)) / ( TPM::gnorm(a,k) * TPM::gnorm(c,k) * TPM::gnorm(e,l) * TPM::gnorm(t,l) );
+
+               //S = 1 part
+               (*this)(i,j) += 3.0 * (tpm(1,a,k,e,l) * tpm(1,c,k,t,l) + tpm(1,a,k,t,l) * tpm(1,c,k,e,l));
+
+            }
+
+         (*this)(i,j) *= 0.5 * scale;
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
