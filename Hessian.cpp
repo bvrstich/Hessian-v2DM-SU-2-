@@ -196,16 +196,16 @@ void Hessian::Q(const TPM &Q){
             ward += 8.0/(N*(N - 1.0)) * Q2(S_,K,L);
 
             if(z == h)
-               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(e,t);
+               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(e,t);
 
             if(e == h)
-               ward -= sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(z,t);
+               ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(z,t);
 
             if(z == t)
-               ward -= sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(e,h);
+               ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(e,h);
 
             if(e == t)
-               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(z,h);
+               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(z,h);
 
          }
 
@@ -214,16 +214,16 @@ void Hessian::Q(const TPM &Q){
             ward +=  8.0/(N*(N - 1.0)) * Q2(S,I,J);
 
             if(b == d)
-               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(a,c);
+               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(a,c);
 
             if(a == d)
-               ward -= sign * TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(b,c);
+               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(b,c);
 
             if(b == c)
-               ward -= sign * TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(a,d);
+               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(a,d);
 
             if(a == c)
-               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * Q2bar(b,d);
+               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * Q2bar(b,d);
 
          }
 

@@ -541,6 +541,6 @@ int TPM::gt2s(int S,int i,int option){
  */
 int TPM::gs2t(int S,int a,int b){
 
-   return t2s[S][a][b];
+   return s2t[S][a][b];
 
 }

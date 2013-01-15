@@ -138,6 +138,8 @@ int main(void) {
    cout << "Total nr of Newton steps = " << tot_iter << endl;
 
    Gradient::clear();
+
+   SPSPM::clear();
    TPTPM::clear();
 
    TPM::clear();
