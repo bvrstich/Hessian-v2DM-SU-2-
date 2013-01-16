@@ -318,3 +318,10 @@ void Hessian::Q(const TPM &Q){
    }
 
 }
+
+/**
+ * construct the G part of the Hessian
+ */
+void Hessian::G(const PHM &G){
+
+}

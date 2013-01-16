@@ -562,7 +562,7 @@ void SUP::fill(const TPM &tpm){
 #endif
 
 #ifdef __G_CON
-   G->G(1,tpm);
+   G->G(tpm);
 #endif
 
 #ifdef __T1_CON
@@ -586,7 +586,7 @@ void SUP::fill(){
 #endif
 
 #ifdef __G_CON
-   G->G(1,*I);
+   G->G(*I);
 #endif 
 
 #ifdef __T1_CON

@@ -141,7 +141,7 @@ void Gradient::construct(double t,const TPM &ham,const SUP &P){
 
 #ifdef __G_CON
    TPM GG;
-   GG.G(1,P.gG());
+   GG.G(P.gG());
 #endif
 
 #ifdef __T1_CON

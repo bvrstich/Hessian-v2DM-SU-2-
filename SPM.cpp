@@ -62,3 +62,34 @@ void SPM::bar(double scale,const TPM &tpm){
    this->symmetrize();
 
 }
+
+/**
+ * Trace out a set of indices to create the "bar" matrix of a PHM, slight difference from the bar(TPM) function (normalization of the tp basisset).
+ * @param scale the factor u want the SPM to be scaled with
+ * @param phm the PHM out of which the SPM will be filled
+ */
+void SPM::bar(double scale,const PHM &phm){
+
+   int M = Tools::gM();
+
+   for(int a = 0;a < M;++a)
+      for(int c = a;c < M;++c){
+
+         (*this)(a,c) = 0.0;
+
+         for(int b = 0;b < M;++b){
+
+            //S = 0 stuk
+            for(int S = 0;S < 2;++S)
+               (*this)(a,c) += phm.gdeg(S)*phm(S,a,b,c,b);
+
+         }
+
+         //nog schalen
+         (*this)(a,c) *= 0.5*scale;
+
+      }
+
+   this->symmetrize();
+
+}

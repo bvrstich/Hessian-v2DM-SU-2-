@@ -544,3 +544,63 @@ int TPM::gs2t(int S,int a,int b){
    return s2t[S][a][b];
 
 }
+
+/**
+ * The G down map, maps a PHM object onto a TPM object using the G map.
+ * @param phm input PHM
+ */
+void TPM::G(const PHM &phm){
+
+   SPM spm;
+   spm.bar(1.0/(Tools::gN() - 1.0),phm);
+
+   int sign;
+   int a,b,c,d;
+
+   for(int S = 0;S < 2;++S){
+
+      sign = 1 - 2*S;
+
+      for(int i = 0;i < gdim(S);++i){
+
+         a = t2s[S][i][0];
+         b = t2s[S][i][1];
+
+         for(int j = i;j < gdim(S);++j){
+
+            c = t2s[S][j][0];
+            d = t2s[S][j][1];
+
+            //init
+            (*this)(S,i,j) = 0.0;
+
+            //ph part
+            for(int Z = 0;Z < 2;++Z)
+               (*this)(S,i,j) -= gdeg(Z) * Tools::g6j(0,0,S,Z) * ( phm(Z,a,d,c,b) + phm(Z,b,c,d,a) + sign*phm(Z,b,d,c,a) + sign*phm(Z,a,c,d,b) );
+
+            //4 sp parts
+            if(b == d)
+               (*this)(S,i,j) += spm(a,c);
+
+            if(a == c)
+               (*this)(S,i,j) += spm(b,d);
+
+            if(a == d)
+               (*this)(S,i,j) += sign*spm(b,c);
+
+            if(b == c)
+               (*this)(S,i,j) += sign*spm(a,d);
+
+            //norms
+            (*this)(S,i,j) *= norm[a][b] * norm[c][d];
+
+
+         }
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
