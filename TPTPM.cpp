@@ -181,3 +181,135 @@ int TPTPM::gtpmm2t(int i,int option){
    return tpmm2t[i][option];
 
 }
+
+/**
+ * fill a TPTPM object by antisymmetrizing a direct product of two PHM's
+ */
+void TPTPM::dp(const PHM &phm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+
+   double *phmarray = new double [2 * M4];
+
+   phm.convert(phmarray);
+
+   int S,S_;
+
+   int sign,sign_;
+
+   int I,J,K,L;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   for(int i = 0;i < gn();++i){
+
+      S = tpmm2t[i][0];
+
+      sign = 1 - 2*S;
+
+      I = tpmm2t[i][1];
+      J = tpmm2t[i][2];
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J,0);
+      d = TPM::gt2s(S,J,1);
+
+      for(int j = i;j < gn();++j){
+
+         S_ = tpmm2t[j][0];
+
+         sign_ = 1 - 2*S_;
+
+         K = tpmm2t[j][1];
+         L = tpmm2t[j][2];
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         (*this)(i,j) = 0.0;
+
+         for(int Z = 0;Z < 2;++Z){
+
+            double ward = phmarray[a + d*M + e*M2 + h*M3 + Z*M4] * phmarray[c + b*M + t*M2 + z*M3 + Z*M4]
+
+               + phmarray[a + d*M + t*M2 + z*M3 + Z*M4] * phmarray[c + b*M + e*M2 + h*M3 + Z*M4]
+
+               + sign_ * (phmarray[a + d*M + z*M2 + h*M3 + Z*M4] * phmarray[c + b*M + t*M2 + e*M3 + Z*M4]
+
+                     + phmarray[a + d*M + t*M2 + e*M3 + Z*M4] * phmarray[c + b*M + z*M2 + h*M3 + Z*M4])
+
+               + sign_ * (phmarray[a + d*M + e*M2 + t*M3 + Z*M4] * phmarray[c + b*M + h*M2 + z*M3 + Z*M4]
+
+                     + phmarray[a + d*M + h*M2 + z*M3 + Z*M4] * phmarray[c + b*M + e*M2 + t*M3 + Z*M4])
+
+               + phmarray[a + d*M + z*M2 + t*M3 + Z*M4] * phmarray[c + b*M + h*M2 + e*M3 + Z*M4] 
+
+               + phmarray[a + d*M + h*M2 + e*M3 + Z*M4] * phmarray[c + b*M + z*M2 + t*M3 + Z*M4]
+
+               + sign * ( phmarray[b + d*M + e*M2 + h*M3 + Z*M4] * phmarray[c + a*M + t*M2 + z*M3 + Z*M4]
+
+                     + phmarray[b + d*M + t*M2 + z*M3 + Z*M4] * phmarray[c + a*M + e*M2 + h*M3 + Z*M4]
+
+                     + sign_ * (phmarray[b + d*M + z*M2 + h*M3 + Z*M4] * phmarray[c + a*M + t*M2 + e*M3 + Z*M4]
+
+                        + phmarray[b + d*M + t*M2 + e*M3 + Z*M4] * phmarray[c + a*M + z*M2 + h*M3 + Z*M4])
+
+                     + sign_ * (phmarray[b + d*M + e*M2 + t*M3 + Z*M4] * phmarray[c + a*M + h*M2 + z*M3 + Z*M4]
+
+                        + phmarray[b + d*M + h*M2 + z*M3 + Z*M4] * phmarray[c + a*M + e*M2 + t*M3 + Z*M4])
+
+                     + phmarray[b + d*M + z*M2 + t*M3 + Z*M4] * phmarray[c + a*M + h*M2 + e*M3 + Z*M4] 
+
+                     + phmarray[b + d*M + h*M2 + e*M3 + Z*M4] * phmarray[c + a*M + z*M2 + t*M3 + Z*M4] )
+
+               + sign * ( phmarray[a + c*M + e*M2 + h*M3 + Z*M4] * phmarray[d + b*M + t*M2 + z*M3 + Z*M4]
+
+               + phmarray[a + c*M + t*M2 + z*M3 + Z*M4] * phmarray[d + b*M + e*M2 + h*M3 + Z*M4]
+
+               + sign_ * (phmarray[a + c*M + z*M2 + h*M3 + Z*M4] * phmarray[d + b*M + t*M2 + e*M3 + Z*M4]
+
+                     + phmarray[a + c*M + t*M2 + e*M3 + Z*M4] * phmarray[d + b*M + z*M2 + h*M3 + Z*M4])
+
+               + sign_ * (phmarray[a + c*M + e*M2 + t*M3 + Z*M4] * phmarray[d + b*M + h*M2 + z*M3 + Z*M4]
+
+                     + phmarray[a + c*M + h*M2 + z*M3 + Z*M4] * phmarray[d + b*M + e*M2 + t*M3 + Z*M4])
+
+               + phmarray[a + c*M + z*M2 + t*M3 + Z*M4] * phmarray[d + b*M + h*M2 + e*M3 + Z*M4] 
+
+               + phmarray[a + c*M + h*M2 + e*M3 + Z*M4] * phmarray[d + b*M + z*M2 + t*M3 + Z*M4] )
+
+               + phmarray[b + c*M + e*M2 + h*M3 + Z*M4] * phmarray[d + a*M + t*M2 + z*M3 + Z*M4]
+
+                     + phmarray[b + c*M + t*M2 + z*M3 + Z*M4] * phmarray[d + a*M + e*M2 + h*M3 + Z*M4]
+
+                     + sign_ * (phmarray[b + c*M + z*M2 + h*M3 + Z*M4] * phmarray[d + a*M + t*M2 + e*M3 + Z*M4]
+
+                        + phmarray[b + c*M + t*M2 + e*M3 + Z*M4] * phmarray[d + a*M + z*M2 + h*M3 + Z*M4])
+
+                     + sign_ * (phmarray[b + c*M + e*M2 + t*M3 + Z*M4] * phmarray[d + a*M + h*M2 + z*M3 + Z*M4]
+
+                        + phmarray[b + c*M + h*M2 + z*M3 + Z*M4] * phmarray[d + a*M + e*M2 + t*M3 + Z*M4])
+
+                     + phmarray[b + c*M + z*M2 + t*M3 + Z*M4] * phmarray[d + a*M + h*M2 + e*M3 + Z*M4] 
+
+                     + phmarray[b + c*M + h*M2 + e*M3 + Z*M4] * phmarray[d + a*M + z*M2 + t*M3 + Z*M4];
+
+            (*this)(i,j) += (2*Z + 1.0) * Tools::g6j(0,0,Z,S) * Tools::g6j(0,0,Z,S_) * ward;
+
+         }//end over Z loop
+
+      }
+   }
+
+   delete [] phmarray;
+
+}

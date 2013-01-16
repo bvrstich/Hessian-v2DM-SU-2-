@@ -114,3 +114,81 @@ void TPSPM::dpt(double scale,const TPM &tpm){
    }
 
 }
+
+/**
+ * construct the antisymmetrized singly-traced direct product of two PHM objects
+ * @param tpm input PHM object
+ */
+void TPSPM::dpt(double scale,const PHM &phm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+
+   double *phmarray = new double [2 * M4];
+
+   phm.convert(phmarray);
+
+   int S,I,J;
+
+   int sign;
+
+   int a,b,c,d;
+
+   int e,t;
+
+   for(int i = 0;i < TPTPM::gn();++i){
+
+      S = TPTPM::gtpmm2t(i,0);
+
+      sign = 1 - 2*S;
+
+      I = TPTPM::gtpmm2t(i,1);
+      J = TPTPM::gtpmm2t(i,2);
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+      c = TPM::gt2s(S,J,0);
+      d = TPM::gt2s(S,J,1);
+
+      for(int j = 0;j < SPSPM::gn();++j){
+
+         e = SPSPM::gspmm2s(j,0);
+         t = SPSPM::gspmm2s(j,1);
+
+         (*this)(i,j) = 0.0;
+
+         for(int Z = 0;Z < 2;++Z){
+
+            for(int l = 0;l < M;++l){
+
+               double ward = phmarray[a + d*M + e*M2 + l*M3 + Z*M4] * phmarray[c + b*M + t*M2 + l*M3 + Z*M4] 
+
+                  + phmarray[a + d*M + t*M2 + l*M3 + Z*M4] * phmarray[c + b*M + e*M2 + l*M3 + Z*M4] 
+
+                  + sign * ( phmarray[b + d*M + e*M2 + l*M3 + Z*M4] * phmarray[c + a*M + t*M2 + l*M3 + Z*M4] 
+
+                        + phmarray[b + d*M + t*M2 + l*M3 + Z*M4] * phmarray[c + a*M + e*M2 + l*M3 + Z*M4] )
+
+                  + sign * ( phmarray[a + c*M + e*M2 + l*M3 + Z*M4] * phmarray[d + b*M + t*M2 + l*M3 + Z*M4] 
+
+                        + phmarray[a + c*M + t*M2 + l*M3 + Z*M4] * phmarray[d + b*M + e*M2 + l*M3 + Z*M4] )
+
+                  + phmarray[b + c*M + e*M2 + l*M3 + Z*M4] * phmarray[d + a*M + t*M2 + l*M3 + Z*M4] 
+
+                  + phmarray[b + c*M + t*M2 + l*M3 + Z*M4] * phmarray[d + a*M + e*M2 + l*M3 + Z*M4];
+
+               (*this)(i,j) += (2*Z + 1.0) * Tools::g6j(0,0,Z,S) * ward;
+
+            }
+         }
+
+         (*this)(i,j) *= scale;
+
+      }
+   }
+
+   delete [] phmarray;
+
+}

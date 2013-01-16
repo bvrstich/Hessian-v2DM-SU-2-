@@ -197,3 +197,22 @@ int PHM::gph2s(int i,int option){
    return s2ph[i][option];
 
 }
+
+/**
+ * convert a PHM to an array, for fast access
+ */
+void PHM::convert(double *array) const {
+
+   int M = Tools::gM();
+   int M2 = M * M;
+   int M3 = M2 * M;
+   int M4 = M3 * M;
+
+   for(int S = 0;S < 2;++S)
+      for(int a = 0;a < M;++a)
+         for(int b = 0;b < M;++b)
+            for(int c = 0;c < M;++c)
+               for(int d = 0;d < M;++d)
+                  array[a + b*M + c*M2 + d*M3 + S*M4] = (*this)(S,a,b,c,d);
+
+}

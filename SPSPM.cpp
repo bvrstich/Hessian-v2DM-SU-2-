@@ -226,3 +226,56 @@ void SPSPM::dpt2(double scale,const TPM &tpm){
    this->symmetrize();
 
 }
+
+/**
+ * construct the doubly traced direct product of two PHM's
+ */
+void SPSPM::dpt2(double scale,const PHM &phm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+
+   double *phmarray = new double [2 * M4];
+
+   phm.convert(phmarray);
+
+   int a,c,e,t;
+
+   for(int i = 0;i < gn();++i){
+
+      a = spmm2s[i][0];
+      c = spmm2s[i][1];
+
+      for(int j = i;j < gn();++j){
+
+         e = spmm2s[j][0];
+         t = spmm2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < Tools::gM();++l)
+            for(int k = 0;k < Tools::gM();++k){
+
+               //S = 0 part
+               (*this)(i,j) += phmarray[a + k*M + e*M2 + l*M3] * phmarray[c + k*M + t*M2 + l*M3] + phmarray[a + k*M + t*M2 + l*M3] * phmarray[c + k*M + e*M2 + l*M3];
+
+               //S = 1 part
+               (*this)(i,j) += phmarray[a + k*M + e*M2 + l*M3 + M4] * phmarray[c + k*M + t*M2 + l*M3 + M4]
+               
+                  + phmarray[a + k*M + t*M2 + l*M3 + M4] * phmarray[c + k*M + e*M2 + l*M3 + M4];
+
+            }
+
+         (*this)(i,j) *= 0.5 * scale;
+
+      }
+
+   }
+
+   delete [] phmarray;
+
+   this->symmetrize();
+
+}

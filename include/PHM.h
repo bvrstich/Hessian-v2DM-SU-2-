@@ -49,6 +49,8 @@ class PHM : public BlockMatrix {
 
       double operator()(int S,int a,int b,int c,int d) const;
 
+      void convert(double *) const;
+
       void G(const TPM &);
 
       static int gph2s(int,int);

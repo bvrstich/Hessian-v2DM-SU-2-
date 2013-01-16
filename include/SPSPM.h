@@ -49,6 +49,8 @@ class SPSPM : public Matrix {
       void dpt2(double,const TPSPM &);
 
       void dpt2(double,const TPM &);
+      
+      void dpt2(double,const PHM &);
 
       static int gn();
 
