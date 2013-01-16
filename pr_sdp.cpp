@@ -41,6 +41,7 @@ int main(void) {
 
    TPM::init();
    PHM::init();
+   DPM::init();
 
    TPTPM::init();
    SPSPM::init();
@@ -143,6 +144,7 @@ int main(void) {
    SPSPM::clear();
    TPTPM::clear();
 
+   DPM::clear();
    PHM::clear();
    TPM::clear();
 
