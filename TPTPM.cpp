@@ -107,6 +107,8 @@ double TPTPM::operator()(int S,int I,int J,int S_,int K,int L) const{
    int i = t2tpmm[S][I][J];
    int j = t2tpmm[S_][K][L];
 
+   cout << j << endl;
+
    return (*this)(i,j);
 
 }
@@ -311,5 +313,101 @@ void TPTPM::dp(const PHM &phm){
    }
 
    delete [] phmarray;
+
+}
+
+/**
+ * construct a TPTPM by doubly-tracing the direct product of a DPM with itsself
+ */
+void TPTPM::dpt2(const DPM &dpm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **dpmarray = new double * [2];
+   
+   dpmarray[0] = new double [4*M6];
+   dpmarray[1] = new double [M6];
+
+   dpm.convert(dpmarray);
+
+   int S,S_;
+
+   int I,J,K,L;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   for(int i = 0;i < gn();++i){
+
+      S = tpmm2t[i][0];
+
+      I = tpmm2t[i][1];
+      J = tpmm2t[i][2];
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J,0);
+      d = TPM::gt2s(S,J,1);
+
+      for(int j = i;j < gn();++j){
+
+         S_ = tpmm2t[j][0];
+
+         K = tpmm2t[j][1];
+         L = tpmm2t[j][2];
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         double ward = 0.0;
+
+         //first S = 1/2
+         for(int r = 0;r < M;++r)
+            for(int s = 0;s < M;++s){
+
+               ward += dpmarray[0][e + z*M + r*M2 + a*M3 + b*M4 + s*M5 + S_*M6 + 2*S*M6] * dpmarray[0][t + h*M + r*M2 + c*M3 + d*M4 + s*M5 + S_*M6 + 2*S*M6]
+
+                  + dpmarray[0][e + z*M + r*M2 + c*M3 + d*M4 + s*M5 + S_*M6 + 2*S*M6] * dpmarray[0][t + h*M + r*M2 + a*M3 + b*M4 + s*M5 + S_*M6 + 2*S*M6];
+
+            }
+
+         (*this)(i,j) = 2.0/( (2*S_ + 1.0) * (2*S + 1.0) ) * ward;
+
+         //then S = 3/2: only contributes if both S and S_ == 1 !
+         if(S == 1 && S_ == 1){
+
+            ward = 0.0;
+
+            for(int r = 0;r < M;++r)
+               for(int s = 0;s < M;++s){
+
+                  ward += dpmarray[1][e + z*M + r*M2 + a*M3 + b*M4 + s*M5] * dpmarray[1][t + h*M + r*M2 + c*M3 + d*M4 + s*M5]
+
+                     + dpmarray[1][e + z*M + r*M2 + c*M3 + d*M4 + s*M5] * dpmarray[1][t + h*M + r*M2 + a*M3 + b*M4 + s*M5];
+
+               }
+
+            (*this)(i,j) += 4.0 / 9.0 * ward;
+
+         }
+
+      }
+   }
+
+   this->symmetrize();
+
+   delete [] dpmarray[0];
+   delete [] dpmarray[1];
+
+   delete [] dpmarray;
 
 }

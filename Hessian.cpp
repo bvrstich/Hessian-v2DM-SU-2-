@@ -473,3 +473,29 @@ void Hessian::G(const PHM &G){
    }
 
 }
+
+/**
+ * construct the T1 part of the Hessian matrix
+ */
+void Hessian::T(const DPM &T){
+
+   int N = Tools::gN();
+
+   DPM T2;
+   T2.squaresym(T);
+
+   TPM T2bar;
+   T2bar.bar(8.0/(N*(N - 1.0)),T2);
+
+   SPM T2barbar;
+   T2barbar.bar(1.0/(2*(N - 1.0)),T2bar);
+
+   double T2trace = 16 * T2.trace()/ (N*N*(N - 1.0)*(N - 1.0));
+
+   TPTPM dpt2;
+   dpt2.dpt2(T);
+
+   TPSPM dpt3;
+   dpt3.dpt3(1.0/(N - 1.0),dpt2);
+
+}

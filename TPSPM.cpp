@@ -117,7 +117,7 @@ void TPSPM::dpt(double scale,const TPM &tpm){
 
 /**
  * construct the antisymmetrized singly-traced direct product of two PHM objects
- * @param tpm input PHM object
+ * @param phm input PHM object
  */
 void TPSPM::dpt(double scale,const PHM &phm){
 
@@ -190,5 +190,55 @@ void TPSPM::dpt(double scale,const PHM &phm){
    }
 
    delete [] phmarray;
+
+}
+
+/**
+ * construct the antisymmetrized triply-traced direct product of two DPM objects
+ * @param tpmm TPTPM
+ */
+void TPSPM::dpt3(double scale,const TPTPM &tpmm){
+
+   int M = Tools::gM();
+
+   int S,I,J;
+
+   int e,t;
+
+   for(int i = 0;i < TPTPM::gn();++i){
+
+      S = TPTPM::gtpmm2t(i,0);
+
+      I = TPTPM::gtpmm2t(i,1);
+      J = TPTPM::gtpmm2t(i,2);
+
+      for(int j = 0;j < SPSPM::gn();++j){
+
+         e = SPSPM::gspmm2s(j,0);
+         t = SPSPM::gspmm2s(j,1);
+
+         (*this)(i,j) = 0.0;
+
+         for(int S_el = 0;S_el < 2;++S_el){
+
+            double ward = 0.0;
+
+            for(int l = 0;l < M;++l){
+               
+               int K = TPM::gs2t(S_el,e,l);
+               int L = TPM::gs2t(S_el,t,l);
+
+               ward += tpmm(S,I,J,S_el,K,L)/ ( TPM::gnorm(e,l) * TPM::gnorm(t,l) );
+
+            }
+
+            (*this)(i,j) += (2*S_el + 1.0) * ward;
+
+         }
+
+         (*this)(i,j) *= 0.5 * scale;
+
+      }
+   }
 
 }

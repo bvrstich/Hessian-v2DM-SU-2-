@@ -13,6 +13,7 @@ using std::vector;
 class Gradient;
 class SUP;
 class PHM;
+class DPM;
 
 /**
  * @author Brecht Verstichel
@@ -76,7 +77,11 @@ class TPM : public BlockMatrix {
 
       double S_2() const;
 
-      void G(const PHM &phm);
+      void G(const PHM &);
+
+      void T(const DPM &);
+
+      void bar(double,const DPM &);
 
       static void init();
 

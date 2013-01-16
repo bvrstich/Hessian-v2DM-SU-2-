@@ -604,3 +604,88 @@ void TPM::G(const PHM &phm){
    this->symmetrize();
 
 }
+
+/** 
+ * The T1-down map that maps a DPM on TPM. This is just a Q-like map using the TPM::bar (dpm) as input.
+ * @param dpm the input DPM matrix
+ */
+void TPM::T(const DPM &dpm){
+
+   TPM tpm;
+   tpm.bar(1.0,dpm);
+
+   double a = 1;
+   double b = 1.0/(3.0*Tools::gN()*(Tools::gN() - 1.0));
+   double c = 0.5/(Tools::gN() - 1.0);
+
+   this->Q(1,a,b,c,tpm);
+
+}
+
+/**
+ * Construct a spincoupled TPM matrix out of a spincoupled DPM matrix, for the definition and derivation see symmetry.pdf
+ * @param dpm input DPM
+ */
+void TPM::bar(double scale,const DPM &dpm){
+
+   int a,b,c,d;
+
+   double ward;
+
+   //first the S = 0 part, easiest:
+   for(int i = 0;i < this->gdim(0);++i){
+
+      a = t2s[0][i][0];
+      b = t2s[0][i][1];
+
+      for(int j = i;j < this->gdim(0);++j){
+
+         c = t2s[0][j][0];
+         d = t2s[0][j][1];
+
+         (*this)(0,i,j) = 0.0;
+
+         //only total S = 1/2 can remain because cannot couple to S = 3/2 with intermediate S = 0
+         for(int l = 0;l < Tools::gM();++l)
+            (*this)(0,i,j) += 2.0 * dpm(0,0,a,b,l,0,c,d,l);
+
+         (*this)(0,i,j) *= scale;
+
+      }
+   }
+
+   //then the S = 1 part:
+   for(int i = 0;i < this->gdim(1);++i){
+
+      a = t2s[1][i][0];
+      b = t2s[1][i][1];
+
+      for(int j = i;j < this->gdim(1);++j){
+
+         c = t2s[1][j][0];
+         d = t2s[1][j][1];
+
+         (*this)(1,i,j) = 0.0;
+
+         for(int Z = 0;Z < 2;++Z){//loop over the dpm blocks: S = 1/2 and 3/2 = Z + 1/2
+
+            ward = 0.0;
+
+            for(int l = 0;l < Tools::gM();++l)
+               ward += dpm(Z,1,a,b,l,1,c,d,l);
+
+            ward *= (2 * (Z + 0.5) + 1.0)/3.0;
+
+            (*this)(1,i,j) += ward;
+
+         }
+
+         (*this)(1,i,j) *= scale;
+
+      }
+
+   }
+
+   this->symmetrize();
+
+}
