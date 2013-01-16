@@ -262,9 +262,9 @@ void SPSPM::dpt2(double scale,const PHM &phm){
                (*this)(i,j) += phmarray[a + k*M + e*M2 + l*M3] * phmarray[c + k*M + t*M2 + l*M3] + phmarray[a + k*M + t*M2 + l*M3] * phmarray[c + k*M + e*M2 + l*M3];
 
                //S = 1 part
-               (*this)(i,j) += phmarray[a + k*M + e*M2 + l*M3 + M4] * phmarray[c + k*M + t*M2 + l*M3 + M4]
+               (*this)(i,j) += 3.0 * ( phmarray[a + k*M + e*M2 + l*M3 + M4] * phmarray[c + k*M + t*M2 + l*M3 + M4]
                
-                  + phmarray[a + k*M + t*M2 + l*M3 + M4] * phmarray[c + k*M + e*M2 + l*M3 + M4];
+                  + phmarray[a + k*M + t*M2 + l*M3 + M4] * phmarray[c + k*M + e*M2 + l*M3 + M4] );
 
             }
 
