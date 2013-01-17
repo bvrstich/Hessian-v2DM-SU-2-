@@ -47,6 +47,8 @@ class SPM : public Matrix {
 
       void bar(double,const PHM &);
 
+      void bar(double,const PPHM &);
+
    private:
 
 };

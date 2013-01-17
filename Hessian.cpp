@@ -671,3 +671,10 @@ void Hessian::T(const DPM &T){
    }
 
 }
+
+/**
+ * construct the T2 part of the Hessian matrix
+ */
+void Hessian::T(const PPHM &T){
+
+}

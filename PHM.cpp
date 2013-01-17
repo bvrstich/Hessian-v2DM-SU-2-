@@ -216,3 +216,67 @@ void PHM::convert(double *array) const {
                   array[a + b*M + c*M2 + d*M3 + S*M4] = (*this)(S,a,b,c,d);
 
 }
+
+/**
+ * The bar function that maps a PPHM object onto a PHM object by tracing away the first pair of incdices of the PPHM
+ * @param scale factor to scale the result with
+ * @param pphm Input PPHM object
+ */
+void PHM::bar(double scale,const PPHM &pphm){
+
+   int a,b,c,d;
+
+   double ward,hard;
+
+   for(int S = 0;S < 2;++S){//loop over spinblocks of PHM
+
+      for(int i = 0;i < this->gdim(S);++i){
+
+         a = ph2s[i][0];
+         b = ph2s[i][1];
+
+         for(int j = i;j < this->gdim(S);++j){
+
+            c = ph2s[j][0];
+            d = ph2s[j][1];
+
+            (*this)(S,i,j) = 0.0;
+
+            //first the S = 1/2 block of the PPHM matrix
+            for(int S_ab = 0;S_ab < 2;++S_ab)
+               for(int S_de = 0;S_de < 2;++S_de){
+
+                  ward = 2.0 * std::sqrt( (2.0*S_ab + 1.0) * (2.0*S_de + 1.0) ) * Tools::g6j(0,0,S,S_ab) * Tools::g6j(0,0,S,S_de);
+
+                  for(int l = 0;l < Tools::gM();++l){
+
+                     hard = ward * pphm(0,S_ab,l,a,b,S_de,l,c,d);
+
+                     //norms
+                     if(l == a)
+                        hard *= std::sqrt(2.0);
+
+                     if(l == c)
+                        hard *= std::sqrt(2.0);
+
+                     (*this)(S,i,j) += hard;
+
+                  }
+
+               }
+
+            //then the S = 3/2 block
+            if(S == 1)
+               for(int l = 0;l < Tools::gM();++l)
+                  (*this)(S,i,j) += 4.0/3.0 * pphm(1,1,l,a,b,1,l,c,d);
+
+            (*this)(S,i,j) *= scale;
+
+         }
+      }
+
+   }
+
+   this->symmetrize();
+
+}

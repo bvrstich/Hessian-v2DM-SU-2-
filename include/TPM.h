@@ -14,6 +14,7 @@ class Gradient;
 class SUP;
 class PHM;
 class DPM;
+class PPHM;
 
 /**
  * @author Brecht Verstichel
@@ -81,7 +82,11 @@ class TPM : public BlockMatrix {
 
       void T(const DPM &);
 
+      void T(const PPHM &);
+
       void bar(double,const DPM &);
+
+      void bar(double,const PPHM &);
 
       static void init();
 

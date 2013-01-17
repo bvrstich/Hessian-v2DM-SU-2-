@@ -689,3 +689,127 @@ void TPM::bar(double scale,const DPM &dpm){
    this->symmetrize();
 
 }
+
+/**
+ * The spincoupled T2-down map that maps a PPHM on a TPM object.
+ * @param pphm Input PPHM object
+ */
+void TPM::T(const PPHM &pphm){
+
+   //first make the bar tpm
+   TPM tpm;
+   tpm.bar(1.0,pphm);
+
+   //then make the bar phm
+   PHM phm;
+   phm.bar(1.0,pphm);
+
+   //also make the bar spm with the correct scale factor
+   SPM spm;
+   spm.bar(0.5/(Tools::gN() - 1.0),pphm);
+
+   int a,b,c,d;
+   int sign;
+
+   double norm;
+
+   for(int S = 0;S < 2;++S){
+
+      sign = 1 - 2*S;
+
+      for(int i = 0;i < this->gdim(S);++i){
+
+         a = t2s[S][i][0];
+         b = t2s[S][i][1];
+
+         for(int j = i;j < this->gdim(S);++j){
+
+            c = t2s[S][j][0];
+            d = t2s[S][j][1];
+
+            //determine the norm for the basisset
+            norm = 1.0;
+
+            if(S == 0){
+
+               if(a == b)
+                  norm /= std::sqrt(2.0);
+
+               if(c == d)
+                  norm /= std::sqrt(2.0);
+
+            }
+
+            //first the tp part
+            (*this)(S,i,j) = tpm(S,i,j);
+
+            //sp part, 4 terms:
+            if(b == d)
+               (*this)(S,i,j) += norm * spm(a,c);
+
+            if(a == d)
+               (*this)(S,i,j) += sign * norm * spm(b,c);
+
+            if(b == c)
+               (*this)(S,i,j) += sign * norm * spm(a,d);
+
+            if(a == c)
+               (*this)(S,i,j) += norm * spm(b,d);
+
+            //ph part:
+            for(int Z = 0;Z < 2;++Z)
+               (*this)(S,i,j) -= norm * (2.0 * Z + 1.0) * Tools::g6j(0,0,S,Z) * ( phm(Z,d,a,b,c) + sign * phm(Z,d,b,a,c) + sign * phm(Z,c,a,b,d) + phm(Z,c,b,a,d) );
+
+         }
+      }
+
+   }
+
+   this->symmetrize();
+
+}
+
+/**
+ * The bar function that maps a PPHM object onto a TPM object by tracing away the last pair of incdices of the PPHM
+ * @param scale factor to scale the result with
+ * @param pphm Input PPHM object
+ */
+void TPM::bar(double scale,const PPHM &pphm){
+
+   int a,b,c,d;
+
+   double ward;
+
+   for(int Z = 0;Z < 2;++Z){
+
+      for(int i = 0;i < this->gdim(Z);++i){
+
+         a = t2s[Z][i][0];
+         b = t2s[Z][i][1];
+
+         for(int j = i;j < this->gdim(Z);++j){
+
+            c = t2s[Z][j][0];
+            d = t2s[Z][j][1];
+
+            (*this)(Z,i,j) = 0.0;
+
+            for(int S = 0;S < 2;++S){//loop over three particle spin: 1/2 and 3/2
+
+               ward = (2.0*(S + 0.5) + 1.0)/(2.0*Z + 1.0);
+
+               for(int l = 0;l < Tools::gM();++l)
+                  (*this)(Z,i,j) += ward * pphm(S,Z,a,b,l,Z,c,d,l);
+
+            }
+
+            (*this)(Z,i,j) *= scale;
+
+         }
+      }
+
+   }
+
+   this->symmetrize();
+
+}

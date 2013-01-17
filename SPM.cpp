@@ -93,3 +93,48 @@ void SPM::bar(double scale,const PHM &phm){
    this->symmetrize();
 
 }
+
+/** 
+ * This bar function maps a PPHM object directly onto a SPM object, scaling it with a factor scale
+ * @param scale the scalefactor
+ * @param pphm Input PPHM object
+ */
+void SPM::bar(double scale,const PPHM &pphm){
+
+   int M = Tools::gM();
+
+   for(int a = 0;a < M;++a)
+      for(int c = a;c < M;++c){
+
+         (*this)(a,c) = 0.0;
+
+         //first S = 1/2 part
+         for(int S_lk = 0;S_lk < 2;++S_lk){
+
+            for(int l = 0;l < M;++l){
+
+               for(int k = 0;k < l;++k)//k < l
+                  (*this)(a,c) += pphm(0,S_lk,l,k,a,S_lk,l,k,c);
+
+               //k == l norm correction
+               (*this)(a,c) += 2.0 * pphm(0,S_lk,l,l,a,S_lk,l,l,c);
+
+               for(int k = l + 1;k < M;++k)//k > l
+                  (*this)(a,c) += pphm(0,S_lk,l,k,a,S_lk,l,k,c);
+
+            }
+         }
+         
+         //then S = 3/2 part:
+         for(int l = 0;l < M;++l)
+            for(int k = 0;k < M;++k)
+               (*this)(a,c) += 2.0 * pphm(1,1,l,k,a,1,l,k,c);
+
+         //scaling
+         (*this)(a,c) *= scale;
+
+      }
+
+   this->symmetrize();
+
+}
