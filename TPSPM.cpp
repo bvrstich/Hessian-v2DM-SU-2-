@@ -250,7 +250,7 @@ void TPSPM::dpt3(double scale,const TPTPM &tpmm){
             int K = TPM::gs2t(1,e,l);
             int L = TPM::gs2t(1,t,l);
 
-            ward += tpmm(S,I,J,1,K,L);
+            ward -= tpmm(S,I,J,1,K,L);
 
          }
 

@@ -576,7 +576,7 @@ void Hessian::T(const DPM &T){
                ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(a,d);
 
             if(a == c)
-               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(b,d);
+               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(b,d);
 
          }
 
