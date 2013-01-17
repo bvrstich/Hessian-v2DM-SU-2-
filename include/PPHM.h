@@ -48,6 +48,12 @@ class PPHM : public BlockMatrix {
       //maak een PPHM van een TPM via de T2 conditie
       void T(const TPM &);
 
+      void convert(double **array) const;
+
+      void convert_st(double **array) const;
+
+      void convert_st2(double **array) const;
+
       static int get_inco(int S,int S_ab,int a,int b,int c,int &i);
 
       static int gs2pph(int,int,int,int,int);

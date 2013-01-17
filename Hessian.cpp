@@ -677,4 +677,10 @@ void Hessian::T(const DPM &T){
  */
 void Hessian::T(const PPHM &T){
 
+   TPTPM dpw2;
+   dpw2.dpw2(T);
+
+   TPTPM dptw;
+   dptw.dptw(T);
+
 }

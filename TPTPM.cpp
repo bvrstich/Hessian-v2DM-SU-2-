@@ -409,3 +409,371 @@ void TPTPM::dpt2(const DPM &dpm){
    delete [] dpmarray;
 
 }
+
+/**
+ * construct a TPTPM by twice skew-tracing a direct product of two PPHM's
+ */
+void TPTPM::dpw2(const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert_st2(ppharray);
+
+   int S,S_;
+
+   int sign,sign_;
+
+   int I,J_index,K,L;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   for(int i = 0;i < gn();++i){
+
+      S = tpmm2t[i][0];
+
+      sign = 1 - 2*S;
+
+      I = tpmm2t[i][1];
+      J_index = tpmm2t[i][2];
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J_index,0);
+      d = TPM::gt2s(S,J_index,1);
+
+      for(int j = i;j < gn();++j){
+
+         S_ = tpmm2t[j][0];
+
+         sign_ = 1 - 2*S_;
+
+         K = tpmm2t[j][1];
+         L = tpmm2t[j][2];
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         double ward = 0.0;
+
+         (*this)(i,j) = 0.0;
+
+         //first S = 1/2
+         for(int J = 0;J < 2;++J)
+            for(int J_ = 0;J_ < 2;++J_){
+
+               ward = 0.0;
+
+               for(int k = 0;k < M;++k)
+                  for(int m = 0;m < M;++m){
+
+                     ward += ( ppharray[0][k + d*M + a*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + a*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6]
+
+                        + sign_ * ( ppharray[0][k + d*M + a*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + a*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        + sign_ * ( ppharray[0][k + d*M + a*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + a*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] )
+
+                        + ppharray[0][k + d*M + a*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + a*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + c*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] 
+
+                        /***********/
+
+                        + sign * ( ppharray[0][k + d*M + b*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + b*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6]
+
+                        + sign_ * ( ppharray[0][k + d*M + b*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + b*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        + sign_ * ( ppharray[0][k + d*M + b*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + b*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] )
+
+                        + ppharray[0][k + d*M + b*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + d*M + b*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + c*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        /************/
+
+                        + sign * ( ppharray[0][k + c*M + a*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + a*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6]
+
+                        + sign_ * ( ppharray[0][k + c*M + a*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + a*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        + sign_ * ( ppharray[0][k + c*M + a*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + a*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] )
+
+                        + ppharray[0][k + c*M + a*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + a*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + b*M + d*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        /*********/
+                        
+                        +  ppharray[0][k + c*M + b*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + b*M2 + m*M3 + z*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + h*M4 + e*M5 + J*M6 + 2*J_*M6]
+
+                        + sign_ * ( ppharray[0][k + c*M + b*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + b*M2 + m*M3 + e*M4 + t*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + h*M4 + z*M5 + J*M6 + 2*J_*M6] )
+
+                        + sign_ * ( ppharray[0][k + c*M + b*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + b*M2 + m*M3 + z*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + t*M4 + e*M5 + J*M6 + 2*J_*M6] )
+
+                        + ppharray[0][k + c*M + b*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6]
+
+                        + ppharray[0][k + c*M + b*M2 + m*M3 + e*M4 + h*M5 + J*M6 + 2*J_*M6] * ppharray[0][k + a*M + d*M2 + m*M3 + t*M4 + z*M5 + J*M6 + 2*J_*M6] );
+
+                  }
+
+               (*this)(i,j) += 2.0 * (2*J_ + 1.0) * (2*J + 1.0) * Tools::g6j(0,0,S,J) * Tools::g6j(0,0,S_,J_) * ward;
+
+            }
+
+         //then the S = 3/2 part
+         ward = 0.0;
+
+         for(int k = 0;k < M;++k)
+            for(int m = 0;m < M;++m){
+
+               ward += ppharray[1][k + d*M + a*M2 + m*M3 + h*M4 + e*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + z*M4 + t*M5]
+
+                  + ppharray[1][k + d*M + a*M2 + m*M3 + z*M4 + t*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + h*M4 + e*M5]
+
+                  + sign_ * ( ppharray[1][k + d*M + a*M2 + m*M3 + h*M4 + z*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + e*M4 + t*M5]
+
+                        + ppharray[1][k + d*M + a*M2 + m*M3 + e*M4 + t*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + h*M4 + z*M5] )
+
+                  + sign_ * ( ppharray[1][k + d*M + a*M2 + m*M3 + t*M4 + e*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + z*M4 + h*M5]
+
+                        + ppharray[1][k + d*M + a*M2 + m*M3 + z*M4 + h*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + t*M4 + e*M5] )
+
+                  + ppharray[1][k + d*M + a*M2 + m*M3 + t*M4 + z*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + e*M4 + h*M5]
+
+                  + ppharray[1][k + d*M + a*M2 + m*M3 + e*M4 + h*M5] * ppharray[1][k + b*M + c*M2 + m*M3 + t*M4 + z*M5] 
+
+                  /***********/
+
+                  + sign * ( ppharray[1][k + d*M + b*M2 + m*M3 + h*M4 + e*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + z*M4 + t*M5]
+
+                        + ppharray[1][k + d*M + b*M2 + m*M3 + z*M4 + t*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + h*M4 + e*M5]
+
+                        + sign_ * ( ppharray[1][k + d*M + b*M2 + m*M3 + h*M4 + z*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + e*M4 + t*M5]
+
+                           + ppharray[1][k + d*M + b*M2 + m*M3 + e*M4 + t*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + h*M4 + z*M5] )
+
+                        + sign_ * ( ppharray[1][k + d*M + b*M2 + m*M3 + t*M4 + e*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + z*M4 + h*M5]
+
+                           + ppharray[1][k + d*M + b*M2 + m*M3 + z*M4 + h*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + t*M4 + e*M5] )
+
+                        + ppharray[1][k + d*M + b*M2 + m*M3 + t*M4 + z*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + e*M4 + h*M5]
+
+                        + ppharray[1][k + d*M + b*M2 + m*M3 + e*M4 + h*M5] * ppharray[1][k + a*M + c*M2 + m*M3 + t*M4 + z*M5] )
+
+                  /************/
+
+                  + sign * ( ppharray[1][k + c*M + a*M2 + m*M3 + h*M4 + e*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + z*M4 + t*M5]
+
+                        + ppharray[1][k + c*M + a*M2 + m*M3 + z*M4 + t*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + h*M4 + e*M5]
+
+                        + sign_ * ( ppharray[1][k + c*M + a*M2 + m*M3 + h*M4 + z*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + e*M4 + t*M5]
+
+                           + ppharray[1][k + c*M + a*M2 + m*M3 + e*M4 + t*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + h*M4 + z*M5] )
+
+                        + sign_ * ( ppharray[1][k + c*M + a*M2 + m*M3 + t*M4 + e*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + z*M4 + h*M5]
+
+                           + ppharray[1][k + c*M + a*M2 + m*M3 + z*M4 + h*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + t*M4 + e*M5] )
+
+                        + ppharray[1][k + c*M + a*M2 + m*M3 + t*M4 + z*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + e*M4 + h*M5]
+
+                        + ppharray[1][k + c*M + a*M2 + m*M3 + e*M4 + h*M5] * ppharray[1][k + b*M + d*M2 + m*M3 + t*M4 + z*M5] )
+
+                  /*********/
+
+                  +  ppharray[1][k + c*M + b*M2 + m*M3 + h*M4 + e*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + z*M4 + t*M5]
+
+                  + ppharray[1][k + c*M + b*M2 + m*M3 + z*M4 + t*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + h*M4 + e*M5]
+
+                  + sign_ * ( ppharray[1][k + c*M + b*M2 + m*M3 + h*M4 + z*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + e*M4 + t*M5]
+
+                        + ppharray[1][k + c*M + b*M2 + m*M3 + e*M4 + t*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + h*M4 + z*M5] )
+
+                  + sign_ * ( ppharray[1][k + c*M + b*M2 + m*M3 + t*M4 + e*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + z*M4 + h*M5]
+
+                        + ppharray[1][k + c*M + b*M2 + m*M3 + z*M4 + h*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + t*M4 + e*M5] )
+
+                  + ppharray[1][k + c*M + b*M2 + m*M3 + t*M4 + z*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + e*M4 + h*M5]
+
+                  + ppharray[1][k + c*M + b*M2 + m*M3 + e*M4 + h*M5] * ppharray[1][k + a*M + d*M2 + m*M3 + t*M4 + z*M5];
+
+            }
+
+         (*this)(i,j) += 4.0 * 9.0 * Tools::g6j(0,0,S,1) * Tools::g6j(0,0,S_,1) * ward;
+
+      }
+   }
+
+   this->symmetrize();
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+}
+
+/**
+ * construct a TPTPM by skew-tracing and regular tracing a direct product of two PPHM's: NOT SYMMETRIC!
+ */
+void TPTPM::dptw(const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert_st(ppharray);
+
+   int S,S_;
+
+   int sign;
+
+   int I,J_index,K,L;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   for(int i = 0;i < gn();++i){
+
+      S = tpmm2t[i][0];
+
+      sign = 1 - 2*S;
+
+      I = tpmm2t[i][1];
+      J_index = tpmm2t[i][2];
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J_index,0);
+      d = TPM::gt2s(S,J_index,1);
+
+      for(int j = 0;j < gn();++j){//not SYMMETRIC!
+
+         S_ = tpmm2t[j][0];
+
+         K = tpmm2t[j][1];
+         L = tpmm2t[j][2];
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         double ward = 0.0;
+
+         (*this)(i,j) = 0.0;
+
+         //first S = 1/2
+         for(int J = 0;J < 2;++J){
+
+            ward = 0.0;
+
+            for(int k = 0;k < M;++k)
+               for(int s = 0;s < M;++s){
+
+                  ward += ppharray[0][e + z*M + s*M2 + k*M3 + d*M4 + a*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + b*M4 + c*M5 + S_*M6 + 2*J*M6]
+
+                     + ppharray[0][e + z*M + s*M2 + k*M3 + b*M4 + c*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + d*M4 + a*M5 + S_*M6 + 2*J*M6]
+
+                     + sign * (ppharray[0][e + z*M + s*M2 + k*M3 + d*M4 + b*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + a*M4 + c*M5 + S_*M6 + 2*J*M6]
+
+                           + ppharray[0][e + z*M + s*M2 + k*M3 + a*M4 + c*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + d*M4 + b*M5 + S_*M6 + 2*J*M6] )
+
+                     + sign * ( ppharray[0][e + z*M + s*M2 + k*M3 + c*M4 + a*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + b*M4 + d*M5 + S_*M6 + 2*J*M6]
+
+                           + ppharray[0][e + z*M + s*M2 + k*M3 + b*M4 + d*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + c*M4 + a*M5 + S_*M6 + 2*J*M6] )
+
+                     + ppharray[0][e + z*M + s*M2 + k*M3 + c*M4 + b*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + a*M4 + d*M5 + S_*M6 + 2*J*M6]
+
+                     + ppharray[0][e + z*M + s*M2 + k*M3 + a*M4 + d*M5 + S_*M6 + 2*J*M6] *  ppharray[0][t + h*M + s*M2 + k*M3 + c*M4 + b*M5 + S_*M6 + 2*J*M6];
+
+               }
+
+            (*this)(i,j) += 2.0 / (2*S_ + 1.0) * (2*J + 1.0) * Tools::g6j(0,0,S,J) * ward;
+
+         }
+
+         //only if S_ == 1 contribution from S = 3/2
+         if(S_ == 1){
+
+            //then S = 3/2
+            for(int k = 0;k < M;++k)
+               for(int s = 0;s < M;++s){
+
+                  ward += ppharray[1][e + z*M + s*M2 + k*M3 + d*M4 + a*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + b*M4 + c*M5]
+
+                     + ppharray[1][e + z*M + s*M2 + k*M3 + b*M4 + c*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + d*M4 + a*M5]
+
+                     + sign * (ppharray[1][e + z*M + s*M2 + k*M3 + d*M4 + b*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + a*M4 + c*M5]
+
+                           + ppharray[1][e + z*M + s*M2 + k*M3 + a*M4 + c*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + d*M4 + b*M5] )
+
+                     + sign * ( ppharray[1][e + z*M + s*M2 + k*M3 + c*M4 + a*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + b*M4 + d*M5]
+
+                           + ppharray[1][e + z*M + s*M2 + k*M3 + b*M4 + d*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + c*M4 + a*M5] )
+
+                     + ppharray[1][e + z*M + s*M2 + k*M3 + c*M4 + b*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + a*M4 + d*M5]
+
+                     + ppharray[1][e + z*M + s*M2 + k*M3 + a*M4 + d*M5] *  ppharray[1][t + h*M + s*M2 + k*M3 + c*M4 + b*M5];
+
+               }
+
+            (*this)(i,j) += 4.0 * Tools::g6j(0,0,S,1) * ward;
+
+         }
+
+      }
+   }
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+}

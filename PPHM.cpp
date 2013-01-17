@@ -558,3 +558,131 @@ ostream &operator<<(ostream &output,const PPHM &pphm_p){
    return output;
 
 }
+
+/**
+ * convert a PPHM to an array
+ */
+void PPHM::convert(double **array) const {
+
+   int M = Tools::gM();
+   int M2 = M * M;
+   int M3 = M2 * M;
+   int M4 = M3 * M;
+   int M5 = M4 * M;
+   int M6 = M5 * M;
+
+   //first S = 1/2
+   for(int S_ab = 0;S_ab < 2;++S_ab)
+      for(int a = 0;a < M;++a)
+         for(int b = 0;b < M;++b)
+            for(int c = 0;c < M;++c)
+               for(int S_de = 0;S_de < 2;++S_de)
+                  for(int d = 0;d < M;++d)
+                     for(int e = 0;e < M;++e)
+                        for(int z = 0;z < M;++z)
+                           array[0][a + b*M + c*M2 + d*M3 + e*M4 + z*M5 + S_ab*M6 + 2*S_de * M6] = (*this)(0,S_ab,a,b,c,S_de,d,e,z);
+
+
+   //then S = 3/2
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c)
+            for(int d = 0;d < M;++d)
+               for(int e = 0;e < M;++e)
+                  for(int z = 0;z < M;++z)
+                     array[1][a + b*M + c*M2 + d*M3 + e*M4 + z*M5] = (*this)(1,1,a,b,c,1,d,e,z);
+
+}
+
+/**
+ * convert a PPHM to an array: using 1 spinsum
+ */
+void PPHM::convert_st(double **array) const {
+
+   int M = Tools::gM();
+   int M2 = M * M;
+   int M3 = M2 * M;
+   int M4 = M3 * M;
+   int M5 = M4 * M;
+   int M6 = M5 * M;
+
+   //first S = 1/2
+   for(int S_ab = 0;S_ab < 2;++S_ab)
+      for(int a = 0;a < M;++a)
+         for(int b = 0;b < M;++b)
+            for(int c = 0;c < M;++c)
+               for(int j = 0;j < 2;++j)
+                  for(int d = 0;d < M;++d)
+                     for(int e = 0;e < M;++e)
+                        for(int z = 0;z < M;++z){
+
+                           array[0][a + b*M + c*M2 + d*M3 + e*M4 + z*M5 + S_ab*M6 + 2*j * M6] = 0.0;
+
+                           for(int S_de = 0;S_de < 2;++S_de){
+
+                              array[0][a + b*M + c*M2 + d*M3 + e*M4 + z*M5 + S_ab*M6 + 2*j * M6] += std::sqrt(2.0*S_de + 1.0) * 
+                              
+                                 Tools::g6j(0,0,j,S_de) * (*this)(0,S_ab,a,b,c,S_de,d,e,z) / TPM::gnorm(d,e);
+
+                           }
+
+                        }
+
+
+   //then S = 3/2
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c)
+            for(int d = 0;d < M;++d)
+               for(int e = 0;e < M;++e)
+                  for(int z = 0;z < M;++z)
+                     array[1][a + b*M + c*M2 + d*M3 + e*M4 + z*M5] = -std::sqrt(1.0/3.0) * (*this)(1,1,a,b,c,1,d,e,z);
+
+}
+
+/**
+ * convert a PPHM to an array: using 2 spinsummations
+ */
+void PPHM::convert_st2(double **array) const {
+
+   int M = Tools::gM();
+   int M2 = M * M;
+   int M3 = M2 * M;
+   int M4 = M3 * M;
+   int M5 = M4 * M;
+   int M6 = M5 * M;
+
+   //first S = 1/2
+   for(int j = 0;j < 2;++j)
+      for(int a = 0;a < M;++a)
+         for(int b = 0;b < M;++b)
+            for(int c = 0;c < M;++c)
+               for(int j_ = 0;j_ < 2;++j_)
+                  for(int d = 0;d < M;++d)
+                     for(int e = 0;e < M;++e)
+                        for(int z = 0;z < M;++z){
+
+                           array[0][a + b*M + c*M2 + d*M3 + e*M4 + z*M5 + j*M6 + 2*j_ * M6] = 0.0;
+
+                           for(int S_ab = 0;S_ab < 2;++S_ab)
+                              for(int S_de = 0;S_de < 2;++S_de){
+
+                                 array[0][a + b*M + c*M2 + d*M3 + e*M4 + z*M5 + j*M6 + 2*j_ * M6] += std::sqrt(2.0*S_ab + 1.0) * std::sqrt(2.0*S_de + 1.0) * 
+                              
+                                    Tools::g6j(0,0,j,S_ab) * Tools::g6j(0,0,j_,S_de) * (*this)(0,S_ab,a,b,c,S_de,d,e,z) / ( TPM::gnorm(a,b) * TPM::gnorm(d,e) );
+
+                              }
+
+                        }
+
+
+   //then S = 3/2
+   for(int a = 0;a < M;++a)
+      for(int b = 0;b < M;++b)
+         for(int c = 0;c < M;++c)
+            for(int d = 0;d < M;++d)
+               for(int e = 0;e < M;++e)
+                  for(int z = 0;z < M;++z)
+                     array[1][a + b*M + c*M2 + d*M3 + e*M4 + z*M5] = 1.0/3.0 * (*this)(1,1,a,b,c,1,d,e,z);
+
+}
