@@ -279,3 +279,41 @@ void SPSPM::dpt2(double scale,const PHM &phm){
    this->symmetrize();
 
 }
+
+/**
+ * construct the doubly traced direct product of two PHM's
+ */
+void SPSPM::dpt4(double scale,const TPSPM &tpspm){
+
+   int a,c,e,t;
+
+   for(int i = 0;i < gn();++i){
+
+      a = spmm2s[i][0];
+      c = spmm2s[i][1];
+
+      for(int j = i;j < gn();++j){
+
+         e = spmm2s[j][0];
+         t = spmm2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         for(int l = 0;l < Tools::gM();++l){
+
+            //S = 0 part
+            (*this)(i,j) += tpspm(0,a,l,c,l,e,t) / (TPM::gnorm(a,l) * TPM::gnorm(c,l)) ;
+
+            //S = 1 part
+            (*this)(i,j) += 3.0 * tpspm(1,a,l,c,l,e,t);
+
+         }
+
+         (*this)(i,j) *= 0.25 * scale;
+
+      }
+   }
+
+   this->symmetrize();
+
+}

@@ -107,8 +107,6 @@ double TPTPM::operator()(int S,int I,int J,int S_,int K,int L) const{
    int i = t2tpmm[S][I][J];
    int j = t2tpmm[S_][K][L];
 
-   cout << j << endl;
-
    return (*this)(i,j);
 
 }

@@ -219,22 +219,52 @@ void TPSPM::dpt3(double scale,const TPTPM &tpmm){
 
          (*this)(i,j) = 0.0;
 
-         for(int S_el = 0;S_el < 2;++S_el){
+         //first S_el = 0
+         double ward = 0.0;
 
-            double ward = 0.0;
+         for(int l = 0;l < M;++l){
 
-            for(int l = 0;l < M;++l){
-               
-               int K = TPM::gs2t(S_el,e,l);
-               int L = TPM::gs2t(S_el,t,l);
+            int K = TPM::gs2t(0,e,l);
+            int L = TPM::gs2t(0,t,l);
 
-               ward += tpmm(S,I,J,S_el,K,L)/ ( TPM::gnorm(e,l) * TPM::gnorm(t,l) );
-
-            }
-
-            (*this)(i,j) += (2*S_el + 1.0) * ward;
+            ward += tpmm(S,I,J,0,K,L)/ ( TPM::gnorm(e,l) * TPM::gnorm(t,l) );
 
          }
+
+         (*this)(i,j) += ward;
+
+         ward = 0.0;
+         
+         //then S_el = 1
+         for(int l = 0;l < e;++l){
+
+            int K = TPM::gs2t(1,e,l);
+            int L = TPM::gs2t(1,t,l);
+
+            ward += tpmm(S,I,J,1,K,L);
+
+         }
+
+         for(int l = e + 1;l < t;++l){
+
+            int K = TPM::gs2t(1,e,l);
+            int L = TPM::gs2t(1,t,l);
+
+            ward += tpmm(S,I,J,1,K,L);
+
+         }
+
+         for(int l = t + 1;l < M;++l){
+
+            int K = TPM::gs2t(1,e,l);
+            int L = TPM::gs2t(1,t,l);
+
+            ward += tpmm(S,I,J,1,K,L);
+
+         }
+
+         (*this)(i,j) += 3.0 * ward;
+
 
          (*this)(i,j) *= 0.5 * scale;
 

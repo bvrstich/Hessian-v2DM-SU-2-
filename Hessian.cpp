@@ -498,4 +498,176 @@ void Hessian::T(const DPM &T){
    TPSPM dpt3;
    dpt3.dpt3(1.0/(N - 1.0),dpt2);
 
+   SPSPM dpt4;
+   dpt4.dpt4(1.0/(N - 1.0),dpt3);
+
+   int S,I,J,S_,K,L;
+
+   //first store everything in ward, then multiply with norms and add to (*this)!
+   double ward;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   int sign,sign_;
+
+   for(int i = 0;i < TPTPM::gn();++i){
+
+      S = TPTPM::gtpmm2t(i,0);
+
+      sign = 1 - 2*S;
+
+      I = TPTPM::gtpmm2t(i,1);
+      J = TPTPM::gtpmm2t(i,2);
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+      c = TPM::gt2s(S,J,0);
+      d = TPM::gt2s(S,J,1);
+
+      for(int j = i;j < TPTPM::gn();++j){
+
+         S_ = TPTPM::gtpmm2t(j,0);
+
+         sign_ = 1 - 2*S_;
+
+         K = TPTPM::gtpmm2t(j,1);
+         L = TPTPM::gtpmm2t(j,2);
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         ward = 2.0 * dpt2(i,j);
+
+         if(I == J){
+
+            if(K == L)
+               ward += T2trace;
+
+            ward += T2bar(S_,e,z,t,h);
+
+            if(z == h)
+               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * T2barbar(e,t);
+
+            if(e == h)
+               ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * T2barbar(z,t);
+
+            if(z == t)
+               ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * T2barbar(e,h);
+
+            if(e == t)
+               ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * T2barbar(z,h);
+
+         }
+
+         if(K == L){
+
+            ward += T2bar(S,a,b,c,d);
+
+            if(b == d)
+               ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(a,c);
+
+            if(a == d)
+               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(b,c);
+
+            if(b == c)
+               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(a,d);
+
+            if(a == c)
+               ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * T2barbar(b,d);
+
+         }
+
+         if(b == d){
+
+            ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * dpt3(S_,e,z,t,h,a,c);
+
+            if(z == h)
+               ward += TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,c,e,t);
+
+            if(e == h)
+               ward += sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,c,z,t);
+
+            if(z == t)
+               ward += sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,c,e,h);
+
+            if(e == t)
+               ward += TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,c,z,h);
+
+         }
+
+         if(a == d){
+
+            ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * dpt3(S_,e,z,t,h,b,c);
+
+            if(z == h)
+               ward += sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,c,e,t);
+
+            if(e == h)
+               ward += sign * sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,c,z,t);
+
+            if(z == t)
+               ward += sign * sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,c,e,h);
+
+            if(e == t)
+               ward += sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,c,z,h);
+
+         }
+
+         if(b == c){
+
+            ward -= sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * dpt3(S_,e,z,t,h,a,d);
+
+            if(z == h)
+               ward += sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,d,e,t);
+
+            if(e == h)
+               ward += sign * sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,d,z,t);
+
+            if(z == t)
+               ward += sign * sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,d,e,h);
+
+            if(e == t)
+               ward += sign * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(a,d,z,h);
+
+         }
+
+         if(a == c){
+
+            ward -= TPM::gnorm(a,b) * TPM::gnorm(c,d) * dpt3(S_,e,z,t,h,b,d);
+
+            if(z == h)
+               ward += TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,d,e,t);
+
+            if(e == h)
+               ward += sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,d,z,t);
+
+            if(z == t)
+               ward += sign_ * TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,d,e,h);
+
+            if(e == t)
+               ward += TPM::gnorm(a,b) * TPM::gnorm(c,d) * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt4(b,d,z,h);
+
+         }
+
+         if(z == h)
+            ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt3(S,a,b,c,d,e,t);
+
+         if(e == h)
+            ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt3(S,a,b,c,d,z,t);
+
+         if(z == t)
+            ward -= sign_ * TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt3(S,a,b,c,d,e,h);
+
+         if(e == t)
+            ward -= TPM::gnorm(e,z) * TPM::gnorm(t,h) * dpt3(S,a,b,c,d,z,h);
+
+         //finally, multiply by the norm
+         (*this)(i,j) += Gradient::gnorm(i) * Gradient::gnorm(j) * (2*S + 1.0) * (2*S_ + 1.0) * ward;
+
+      }
+   }
+
 }
