@@ -139,6 +139,26 @@ class SUP{
 
       const PPHM &gT2() const;
 #endif
+      
+      void init_X(double,const TPM &,const SUP &);
+
+      void init_Z();
+
+      double center_dev(const SUP &) const;
+
+      void D(const SUP &,const SUP &);
+
+      void proj_C();
+
+      double line_search(const SUP &,const SUP &,const SUP &,double) const;
+
+      void proj_C(const TPM &);
+
+      void proj_U();
+
+      static int gdim();
+
+      static void init();
 
    private:
 
@@ -164,6 +184,9 @@ class SUP{
       //!pointer to the two-particle-one-hole matrix PPHM
       PPHM *T2;
 #endif
+
+      //!total dim of the SUP matrix
+      static int dim;
 
 };
 

@@ -88,7 +88,11 @@ class Vector{
       
       double max() const;
 
-      double lsfunc(double) const;
+      double sum() const;
+
+      double log_product() const;
+
+      double centerpot(double ) const;
 
    private:
 

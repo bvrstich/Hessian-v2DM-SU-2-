@@ -16,6 +16,10 @@ int ***TPM::s2t;
 
 double **TPM::norm;
 
+double TPM::Sa;
+double TPM::Sb;
+double TPM::Sc;
+
 /**
  * construct the static lists
  */
@@ -89,6 +93,37 @@ void TPM::init(){
 
       }
 
+   //only for overlapmatrix coefficients!
+   M *= 2;
+   int N = Tools::gN();
+
+   Sa = 1.0;
+   Sb = 0.0;
+   Sc = 0.0;
+
+#ifdef __Q_CON
+   Sa += 1.0;
+   Sb += (4.0*N*N + 2.0*N - 4.0*N*M + M*M - M)/(N*N*(N - 1.0)*(N - 1.0));
+   Sc += (2.0*N - M)/((N - 1.0)*(N - 1.0));
+#endif
+
+#ifdef __G_CON
+   Sa += 4.0;
+   Sc += (2.0*N - M - 2.0)/((N - 1.0)*(N - 1.0));
+#endif
+
+#ifdef __T1_CON
+   Sa += M - 4.0;
+   Sb += (M*M*M - 6.0*M*M*N -3.0*M*M + 12.0*M*N*N + 12.0*M*N + 2.0*M - 18.0*N*N - 6.0*N*N*N)/( 3.0*N*N*(N - 1.0)*(N - 1.0) );
+   Sc -= (M*M + 2.0*N*N - 4.0*M*N - M + 8.0*N - 4.0)/( 2.0*(N - 1.0)*(N - 1.0) );
+#endif
+
+#ifdef __T2_CON
+   Sa += 5.0*M - 8.0;
+   Sb += 2.0/(N - 1.0);
+   Sc += (2.0*N*N + (M - 2.0)*(4.0*N - 3.0) - M*M)/(2.0*(N - 1.0)*(N - 1.0));
+#endif
+
 }
 
 /**
@@ -106,7 +141,7 @@ void TPM::clear(){
       delete [] s2t[S];
 
    }
-   
+
    delete [] s2t;
 
    delete [] t2s;
@@ -417,77 +452,6 @@ void TPM::convert(const Gradient &grad){
          }
 
    this->symmetrize();
-
-}
-
-/**
- * perform a line search what step size in along the Newton direction is ideal.
- * @param t potential scaling factor
- * @param P SUP matrix containing the inverse of the constraints (carrier space matrices)
- * @param ham Hamiltonian of the problem
- * @return the steplength
- */
-double TPM::line_search(double t,SUP &P,TPM &ham){
-
-   double tolerance = 1.0e-5*t;
-
-   if(tolerance < 1.0e-12)
-      tolerance = 1.0e-12;
-
-   //neem de wortel uit P
-   P.sqrt(1);
-
-   //maak eerst een SUP van delta
-   SUP S_delta;
-
-   S_delta.fill(*this);
-
-   //hulpje om dingskes in te steken:
-   SUP hulp;
-
-   hulp.L_map(P,S_delta);
-
-   EIG eigen(hulp);
-
-   double a = 0;
-
-   double b = -1.0/eigen.min();
-
-   double c(0);
-
-   double ham_delta = ham.ddot(*this);
-
-   while(b - a > tolerance){
-
-      c = (b + a)/2.0;
-
-      if( (ham_delta - t*eigen.lsfunc(c)) < 0.0)
-         a = c;
-      else
-         b = c;
-
-   }
-
-   return c;
-
-}
-
-/**
- * perform a line search what step size in along the Newton direction is ideal, this one is used for extrapolation.
- * @param t potential scaling factor
- * @param rdm TPM containing the current approximation of the rdm.
- * @param ham Hamiltonian of the problem
- * @return the steplength
- */
-double TPM::line_search(double t,TPM &rdm,TPM &ham){
-
-   SUP P;
- 
-   P.fill(rdm);
-
-   P.invert();
-
-   return this->line_search(t,P,ham);
 
 }
 
@@ -811,5 +775,70 @@ void TPM::bar(double scale,const PPHM &pphm){
    }
 
    this->symmetrize();
+
+}
+
+/**
+ * Collaps a SUP matrix S onto a TPM matrix like this:\n\n
+ * sum_i Tr (S u^i)f^i = this
+ * @param option = 0, project onto full symmetric matrix space, = 1 project onto traceless symmetric matrix space
+ * @param S input SUP
+ */
+void TPM::collaps(int option,const SUP &S){
+
+   *this = S.gI();
+
+   TPM hulp;
+
+   hulp.Q(1,S.gQ());
+
+   *this += hulp;
+
+#ifdef __G_CON
+   hulp.G(S.gG());
+
+   *this += hulp;
+#endif
+
+#ifdef __T1_CON
+   hulp.T(S.gT1());
+
+   *this += hulp;
+#endif
+
+#ifdef __T2_CON
+   hulp.T(S.gT2());
+
+   *this += hulp;
+#endif
+
+   if(option == 1)
+      this->proj_Tr();
+
+}
+
+/**
+ * ( Overlapmatrix of the U-basis ) - map, maps a TPM onto a different TPM, this map is actually a Q-like map
+ * for which the paramaters a,b and c are calculated in primal_dual.pdf. Since it is a Q-like map the inverse
+ * can be taken as well.
+ * @param option = 1 direct overlapmatrix-map is used , = -1 inverse overlapmatrix map is used
+ * @param tpm_d the input TPM
+ */
+void TPM::S(int option,const TPM &tpm_d){
+
+   this->Q(option,Sa,Sb,Sc,tpm_d);
+
+}
+
+/**
+ * orthogonal projection onto the space of traceless matrices
+ */
+void TPM::proj_Tr(){
+
+   double ward = (2.0 * this->trace())/(2*Tools::gM()*(2*Tools::gM() - 1));
+
+   for(int B = 0;B < 2;++B)
+      for(int i = 0;i < gdim(B);++i)
+         (*this)(B,i,i) -= ward;
 
 }

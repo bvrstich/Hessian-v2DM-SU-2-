@@ -88,7 +88,11 @@ class BlockVector{
       
       double max() const;
 
-      double lsfunc(double alpha) const;
+      double sum() const;
+
+      double log_product() const;
+
+      double centerpot(double ) const;
 
    private:
 
@@ -431,16 +435,47 @@ void BlockVector<BlockMatrixType>::diagonalize(BlockMatrixType &MT){
 }
 
 /**
- * Function used by the EIG::lsfunc function, used in the line search algorithm.
- * @param alpha steplenght in the search direction.
+ * @return the sum of all the elements in the blockvector, weighing the blocks with their degeneracy.
  */
 template<class BlockMatrixType>
-double BlockVector<BlockMatrixType>::lsfunc(double alpha) const{
+double BlockVector<BlockMatrixType>::sum() const{
+
+   double ward = 0;
+
+   for(int i = 0;i < nr;++i)
+      ward += degen[i]*blockvector[i]->sum();
+
+   return ward;
+
+}
+
+/**
+ * @return the logarithm of the product of all the elements in the blockvector (so the sum of all the logarithms), again weighed with their degeneracies
+ */
+template<class BlockMatrixType>
+double BlockVector<BlockMatrixType>::log_product() const{
+
+   double ward = 0;
+
+   for(int i = 0;i < nr;++i)
+      ward += degen[i]*blockvector[i]->log_product();
+
+   return ward;
+
+}
+
+/**
+ * A function needed in the calcalation of the distance from the center, used the Vector::centerpot function 
+ * but weighed with the degeneracies of the different blocks.
+ * @return the result of the function
+ */
+template<class BlockMatrixType>
+double BlockVector<BlockMatrixType>::centerpot(double alpha) const{
 
    double ward = 0.0;
 
-   for(int i = 0;i < nr;i++)
-      ward += degen[i] * blockvector[i]->lsfunc(alpha);
+   for(int i = 0;i < nr;++i)
+      ward += degen[i]*blockvector[i]->centerpot(alpha);
 
    return ward;
 

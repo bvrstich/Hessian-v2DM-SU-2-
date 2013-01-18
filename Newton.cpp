@@ -65,33 +65,28 @@ const Gradient &Newton::gGradient() const {
  * construct the different parts of the linear system
  * @param t potential scaling parameter
  * @param ham hamiltonian object
- * @param P object containing the inverse of the matrix constraints p and q.
+ * @param D metric matrix
  */
-void Newton::construct(double t,const TPM &ham,const SUP &P){
-
-   //first construct the gradient
-   gradient->construct(t,ham,P);
+void Newton::construct(const SUP &D){
 
    //construct the p part of the hessian
-   H->I(P.gI());
+   H->I(D.gI());
 
 #ifdef __Q_CON
-   H->Q(P.gQ());
+   H->Q(D.gQ());
 #endif
 
 #ifdef __G_CON
-   H->G(P.gG());
+   H->G(D.gG());
 #endif
 
 #ifdef __T1_CON
-   H->T(P.gT1());
+   H->T(D.gT1());
 #endif
 
 #ifdef __T2_CON
-   H->T(P.gT2());
+   H->T(D.gT2());
 #endif
-
-   H->dscal(t);
 
    //the constraint/lagrange multiplier part of the Hessian
    H->lagr();
@@ -103,5 +98,18 @@ void Newton::construct(double t,const TPM &ham,const SUP &P){
 
    //and last but not least, solve the system
    H->solve_sy(gradient->gpointer());
+
+}
+
+
+/**
+ *  set the right-hand side of the Newton equations
+ */
+void Newton::set_rhs(const TPM &tpm){
+
+   gradient->convert(tpm);
+
+   //last part of right-hand side (lagrange multiplier)
+   (*gradient)[TPTPM::gn()] = 0.0;
 
 }

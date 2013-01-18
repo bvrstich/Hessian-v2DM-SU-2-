@@ -88,6 +88,10 @@ class TPM : public BlockMatrix {
 
       void bar(double,const PPHM &);
 
+      void collaps(int,const SUP &);
+
+      void S(int,const TPM &);
+
       static void init();
 
       static void clear();
@@ -109,6 +113,9 @@ class TPM : public BlockMatrix {
       static int ***s2t;
 
       static double **norm;
+
+      //!static variables of the inverse overlapmatrix.
+      static double Sa,Sb,Sc;
 
 };
 

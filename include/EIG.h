@@ -114,7 +114,13 @@ class EIG{
 
       double max() const;
 
-      double lsfunc(double) const;
+      double centerpot(double,const EIG &,double,double) const;
+
+      double center_dev() const;
+
+      static int gdim();
+
+      static void init();
 
    private:
 
@@ -139,6 +145,8 @@ class EIG{
       //!single pointer to a BlockVector<PPHM> object, the eigenvalues of T2 part of a SUP matrix will be stored here.
       BlockVector<PPHM> *vT2;
 #endif
+
+      static int dim;
 
 };
 

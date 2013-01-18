@@ -7,6 +7,31 @@ using std::endl;
 
 #include "include.h"
 
+int EIG::dim;
+
+/**
+ * initialize the statics
+ */
+void EIG::init(){
+
+   int M = 2*Tools::gM();
+
+   dim = M*(M - 1);
+
+#ifdef __G_CON
+   dim += M*M;
+#endif
+
+#ifdef __T1_CON
+   dim += M*(M - 1)*(M - 2)/6;
+#endif
+
+#ifdef __T2_CON
+   dim += M*M*(M - 1)/2;
+#endif
+
+}
+
 /**
  * standard constructor with initialization on the eigenvalues of a SUP object.
  * @param sup input SUP object that will be destroyed after this function is called. The eigenvectors
@@ -331,28 +356,75 @@ double EIG::max() const{
 }
 
 /**
- * @param alpha step length along the Newton direction
- * @return The line search function, gradient of the potential in the Newton direction as a function of the step length alpha
+ * @return The deviation of the central path as calculated with the logarithmic barrierfunction, the EIG object is calculated
+ * in SUP::center_dev.
  */
-double EIG::lsfunc(double alpha) const{
+double EIG::center_dev() const{
 
-   double ward = vI->lsfunc(alpha);
+   double sum = vI->sum() + vQ->sum();
 
-#ifdef __Q_CON
-   ward += vQ->lsfunc(alpha);
-#endif
+   double log_product = vI->log_product() + vQ->log_product();
 
 #ifdef __G_CON
-   ward += vG->lsfunc(alpha);
+   sum += vG->sum();
+
+   log_product += vG->log_product();
 #endif
 
 #ifdef __T1_CON
-   ward += vT1->lsfunc(alpha);
+   sum += vT1->sum();
+
+   log_product += vT1->log_product();
 #endif
 
 #ifdef __T2_CON
-   ward += vT2->lsfunc(alpha);
+   sum += vT2->sum();
+
+   log_product += vT2->log_product();
+#endif
+
+   return dim*log(sum/(double)dim) - log_product;
+
+}
+
+/**
+ * @return the deviation of the central path measured trough the logarithmic potential barrier (see primal_dual.pdf), when you take a stepsize alpha from
+ * the point (S,Z) in the primal dual newton direction (DS,DZ), for which you have calculated the generalized eigenvalues eigen_S and eigen_Z in SUP::line_search.
+ * (*this) = eigen_S --> generalized eigenvalues for the DS step
+ * @param alpha the stepsize
+ * @param eigen_Z --> generalized eigenvalues for the DS step
+ * @param c_S = Tr (DS Z)/Tr (SZ): parameter calculated in SUP::line_search
+ * @param c_Z = Tr (S DZ)/Tr (SZ): parameter calculated in SUP::line_search
+ */
+double EIG::centerpot(double alpha,const EIG &eigen_Z,double c_S,double c_Z) const{
+
+   double ward = dim*log(1.0 + alpha*(c_S + c_Z));
+
+   ward -= vI->centerpot(alpha) + eigen_Z.gvI().centerpot(alpha);
+
+   ward -= vQ->centerpot(alpha) + eigen_Z.gvQ().centerpot(alpha);
+
+#ifdef __G_CON
+   ward -= vG->centerpot(alpha) + eigen_Z.gvG().centerpot(alpha);
+#endif
+
+#ifdef __T1_CON
+   ward -= vT1->centerpot(alpha) + eigen_Z.gvT1().centerpot(alpha);
+#endif
+
+#ifdef __T2_CON
+   ward -= vT2->centerpot(alpha) + eigen_Z.gvT2().centerpot(alpha);
 #endif
 
    return ward;
+
+}
+
+/**
+ * @return the total dimension
+ */
+int EIG::gdim(){
+
+   return dim;
+
 }

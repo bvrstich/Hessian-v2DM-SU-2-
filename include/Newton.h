@@ -32,7 +32,9 @@ class Newton{
 
       const Gradient &gGradient() const;
 
-      void construct(double,const TPM &,const SUP &);
+      void construct(const SUP &);
+
+      void set_rhs(const TPM &);
 
    private:
 
