@@ -742,6 +742,8 @@ void TPTPM::dptw(const PPHM &pphm){
          //only if S_ == 1 contribution from S = 3/2
          if(S_ == 1){
 
+            ward = 0.0;
+
             //then S = 3/2
             for(int k = 0;k < M;++k)
                for(int s = 0;s < M;++s){
@@ -770,6 +772,103 @@ void TPTPM::dptw(const PPHM &pphm){
 
       }
    }
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+}
+
+/**
+ * construct a TPTPM by skew-tracing and regular tracing a direct product of two PPHM's: NOT SYMMETRIC!
+ */
+void TPTPM::dpt2(const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert(ppharray);
+
+   int S,S_;
+
+   int I,J_index,K,L;
+
+   int a,b,c,d;
+   int e,z,t,h;
+
+   for(int i = 0;i < gn();++i){
+
+      S = tpmm2t[i][0];
+
+      I = tpmm2t[i][1];
+      J_index = tpmm2t[i][2];
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J_index,0);
+      d = TPM::gt2s(S,J_index,1);
+
+      for(int j = i;j < gn();++j){
+
+         S_ = tpmm2t[j][0];
+
+         K = tpmm2t[j][1];
+         L = tpmm2t[j][2];
+
+         e = TPM::gt2s(S_,K,0);
+         z = TPM::gt2s(S_,K,1);
+
+         t = TPM::gt2s(S_,L,0);
+         h = TPM::gt2s(S_,L,1);
+
+         double ward = 0.0;
+
+         (*this)(i,j) = 0.0;
+
+         //first S = 1/2
+         for(int s = 0;s < M;++s)
+            for(int r = 0;r < M;++r){
+
+               ward += ppharray[0][a + b*M + s*M2 + e*M3 + z*M4 + r*M5 + S*M6 + 2*S_*M6] * ppharray[0][c + d*M + s*M2 + t*M3 + h*M4 + r*M5 + S*M6 + 2*S_*M6]
+
+                  + ppharray[0][a + b*M + s*M2 + t*M3 + h*M4 + r*M5 + S*M6 + 2*S_*M6] * ppharray[0][c + d*M + s*M2 + e*M3 + z*M4 + r*M5 + S*M6 + 2*S_*M6];
+
+            }
+
+         (*this)(i,j) += 2.0 / ( (2.0*S + 1.0) * (2.0*S_ + 1.0) ) * ward;
+
+         if(S == 1 && S_ == 1){//only then S = 3/2 contribution
+
+            ward = 0.0;
+
+            for(int s = 0;s < M;++s)
+               for(int r = 0;r < M;++r){
+
+                  ward += ppharray[1][a + b*M + s*M2 + e*M3 + z*M4 + r*M5] * ppharray[1][c + d*M + s*M2 + t*M3 + h*M4 + r*M5]
+
+                     + ppharray[1][a + b*M + s*M2 + t*M3 + h*M4 + r*M5] * ppharray[1][c + d*M + s*M2 + e*M3 + z*M4 + r*M5];
+
+               }
+
+            (*this)(i,j) += 4.0/9.0 * ward;
+
+         }
+
+      }
+   }
+
+   this->symmetrize();
 
    delete [] ppharray[0];
    delete [] ppharray[1];

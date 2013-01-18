@@ -317,3 +317,85 @@ void SPSPM::dpt4(double scale,const TPSPM &tpspm){
    this->symmetrize();
 
 }
+
+/**
+ * construct the quartly skew-traced direct product of two PPHM's
+ */
+void SPSPM::dpw4(double scale,const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert(ppharray);
+
+   int a,c,e,t;
+
+   for(int i = 0;i < gn();++i){
+
+      a = spmm2s[i][0];
+      c = spmm2s[i][1];
+
+      for(int j = i;j < gn();++j){
+
+         e = spmm2s[j][0];
+         t = spmm2s[j][1];
+
+         (*this)(i,j) = 0.0;
+
+         double ward = 0.0;
+
+         //first S = 1/2
+         for(int S_kl = 0;S_kl < 2;++S_kl)
+            for(int k = 0;k < M;++k)
+               for(int l = k + S_kl;l < M;++l)
+                  for(int S_mn = 0;S_mn < 2;++S_mn)
+                     for(int m = 0;m < M;++m)
+                        for(int n = m + S_mn;n < M;++n){
+
+                           ward += ppharray[0][k + l*M + a*M2 + m*M3 + n*M4 + e*M5 + S_kl*M6 + 2*S_mn*M6] *  ppharray[0][k + l*M + c*M2 + m*M3 + n*M4 + t*M5 + S_kl*M6 + 2*S_mn*M6]
+
+                              + ppharray[0][k + l*M + a*M2 + m*M3 + n*M4 + t*M5 + S_kl*M6 + 2*S_mn*M6] *  ppharray[0][k + l*M + c*M2 + m*M3 + n*M4 + e*M5 + S_kl*M6 + 2*S_mn*M6];
+
+                        }
+
+         (*this)(i,j) += ward;
+
+         ward = 0.0;
+
+         //then S = 3/2
+         for(int k = 0;k < M;++k)
+            for(int l = k + 1;l < M;++l)
+               for(int m = 0;m < M;++m)
+                  for(int n = m + 1;n < M;++n){
+
+                     ward += ppharray[1][k + l*M + a*M2 + m*M3 + n*M4 + e*M5] *  ppharray[1][k + l*M + c*M2 + m*M3 + n*M4 + t*M5]
+
+                        + ppharray[1][k + l*M + a*M2 + m*M3 + n*M4 + t*M5] *  ppharray[1][k + l*M + c*M2 + m*M3 + n*M4 + e*M5];
+
+
+                  }
+
+         (*this)(i,j) += 2.0 * ward;
+
+         (*this)(i,j) *= scale;
+
+      }
+   }
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+   this->symmetrize();
+
+}

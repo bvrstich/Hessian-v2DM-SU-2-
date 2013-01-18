@@ -11,6 +11,7 @@ using std::vector;
 #include "Matrix.h"
 
 class TPSPM;
+class PPHM;
 
 /**
  * @author Brecht Verstichel
@@ -53,6 +54,8 @@ class SPSPM : public Matrix {
       void dpt2(double,const PHM &);
 
       void dpt4(double,const TPSPM &);
+
+      void dpw4(double,const PPHM &);
 
       static int gn();
 

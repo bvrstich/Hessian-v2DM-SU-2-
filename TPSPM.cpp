@@ -272,3 +272,222 @@ void TPSPM::dpt3(double scale,const TPTPM &tpmm){
    }
 
 }
+
+/**
+ * construct the antisymmetrized triply- skew traced direct product of two PPHM objects
+ */
+void TPSPM::dpw3(double scale,const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert_st(ppharray);
+
+   int S,I,J_index;
+
+   int sign;
+
+   int a,b,c,d;
+
+   int e,t;
+
+   for(int i = 0;i < TPTPM::gn();++i){
+
+      S = TPTPM::gtpmm2t(i,0);
+
+      sign = 1 - 2*S;
+
+      I = TPTPM::gtpmm2t(i,1);
+      J_index = TPTPM::gtpmm2t(i,2);
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J_index,0);
+      d = TPM::gt2s(S,J_index,1);
+
+      for(int j = 0;j < SPSPM::gn();++j){
+
+         e = SPSPM::gspmm2s(j,0);
+         t = SPSPM::gspmm2s(j,1);
+
+         (*this)(i,j) = 0.0;
+
+         double ward;
+
+         //first S = 1/2
+         for(int J = 0;J < 2;++J){
+
+            ward = 0.0;
+
+            for(int k = 0;k < M;++k)
+               for(int S_mn = 0;S_mn < 2;++S_mn)
+                  for(int m = 0;m < M;++m)
+                     for(int n = m + S_mn;n < M;++n){
+
+                        ward += ppharray[0][m + n*M + e*M2 + k*M3 + d*M4 + a*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + b*M4 + c*M5 + S_mn*M6 + 2*J*M6]
+
+                           + ppharray[0][m + n*M + e*M2 + k*M3 + b*M4 + c*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + d*M4 + a*M5 + S_mn*M6 + 2*J*M6]
+
+                           + sign * ( ppharray[0][m + n*M + e*M2 + k*M3 + d*M4 + b*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + a*M4 + c*M5 + S_mn*M6 + 2*J*M6]
+
+                                 + ppharray[0][m + n*M + e*M2 + k*M3 + a*M4 + c*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + d*M4 + b*M5 + S_mn*M6 + 2*J*M6] )
+
+                           + sign * ( ppharray[0][m + n*M + e*M2 + k*M3 + c*M4 + a*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + b*M4 + d*M5 + S_mn*M6 + 2*J*M6]
+
+                                 + ppharray[0][m + n*M + e*M2 + k*M3 + b*M4 + d*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + c*M4 + a*M5 + S_mn*M6 + 2*J*M6] )
+
+                           + ppharray[0][m + n*M + e*M2 + k*M3 + c*M4 + b*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + a*M4 + d*M5 + S_mn*M6 + 2*J*M6]
+
+                           + ppharray[0][m + n*M + e*M2 + k*M3 + a*M4 + d*M5 + S_mn*M6 + 2*J*M6] * ppharray[0][m + n*M + t*M2 + k*M3 + c*M4 + b*M5 + S_mn*M6 + 2*J*M6];
+
+
+                     }
+
+            (*this)(i,j) += (2*J + 1.0) * Tools::g6j(0,0,S,J) * ward;
+
+         }
+
+         ward = 0.0;
+
+         //then S = 3/2
+         for(int k = 0;k < M;++k)
+            for(int m = 0;m < M;++m)
+               for(int n = m + 1;n < M;++n){
+
+                  ward += ppharray[1][m + n*M + e*M2 + k*M3 + d*M4 + a*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + b*M4 + c*M5]
+
+                     + ppharray[1][m + n*M + e*M2 + k*M3 + b*M4 + c*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + d*M4 + a*M5]
+
+                     + sign * ( ppharray[1][m + n*M + e*M2 + k*M3 + d*M4 + b*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + a*M4 + c*M5]
+
+                           + ppharray[1][m + n*M + e*M2 + k*M3 + a*M4 + c*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + d*M4 + b*M5] )
+
+                     + sign * ( ppharray[1][m + n*M + e*M2 + k*M3 + c*M4 + a*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + b*M4 + d*M5]
+
+                           + ppharray[1][m + n*M + e*M2 + k*M3 + b*M4 + d*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + c*M4 + a*M5] )
+
+                     + ppharray[1][m + n*M + e*M2 + k*M3 + c*M4 + b*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + a*M4 + d*M5]
+
+                     + ppharray[1][m + n*M + e*M2 + k*M3 + a*M4 + d*M5] * ppharray[1][m + n*M + t*M2 + k*M3 + c*M4 + b*M5];
+
+               }
+
+         (*this)(i,j) += 6.0 * Tools::g6j(0,0,S,1) * ward;
+
+         (*this)(i,j) *= scale;
+
+      }
+   }
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+
+}
+
+/**
+ * construct the doubly-skew traced and once regular traced,  direct product of two PPHM objects
+ * @param pphm input PPHM
+ */
+void TPSPM::dptw2(double scale,const PPHM &pphm){
+
+   int M = Tools::gM();
+   int M2 = M*M;
+   int M3 = M2*M;
+   int M4 = M3*M;
+   int M5 = M4*M;
+   int M6 = M5*M;
+
+   double **ppharray = new double * [2];
+
+   ppharray[0] = new double [4*M6];
+   ppharray[1] = new double [M6];
+
+   pphm.convert(ppharray);
+
+   int S,I,J_index;
+
+   int a,b,c,d;
+
+   int e,t;
+
+   for(int i = 0;i < TPTPM::gn();++i){
+
+      S = TPTPM::gtpmm2t(i,0);
+
+      I = TPTPM::gtpmm2t(i,1);
+      J_index = TPTPM::gtpmm2t(i,2);
+
+      a = TPM::gt2s(S,I,0);
+      b = TPM::gt2s(S,I,1);
+
+      c = TPM::gt2s(S,J_index,0);
+      d = TPM::gt2s(S,J_index,1);
+
+      for(int j = 0;j < SPSPM::gn();++j){
+
+         e = SPSPM::gspmm2s(j,0);
+         t = SPSPM::gspmm2s(j,1);
+
+         (*this)(i,j) = 0.0;
+
+         double ward = 0.0;
+
+         //first S = 1/2
+         for(int s = 0;s < M;++s)
+            for(int S_kl = 0;S_kl < 2;++S_kl)
+               for(int k = 0;k < M;++k)
+                  for(int l = k + S_kl;l < M;++l){
+
+                     ward += ppharray[0][a + b*M + s*M2 + k*M3 + l*M4 + e*M5 + S*M6 + 2*S_kl*M6] * ppharray[0][c + d*M + s*M2 + k*M3 + l*M4 + t*M5 + S*M6 + 2*S_kl*M6]
+
+                        + ppharray[0][a + b*M + s*M2 + k*M3 + l*M4 + t*M5 + S*M6 + 2*S_kl*M6] * ppharray[0][c + d*M + s*M2 + k*M3 + l*M4 + e*M5 + S*M6 + 2*S_kl*M6];
+
+                  }
+
+         (*this)(i,j) += ward;
+
+         
+         //S = 3/2, only if:
+         if(S == 1){
+
+            ward = 0.0;
+
+            for(int s = 0;s < M;++s)
+               for(int k = 0;k < M;++k)
+                  for(int l = k + 1;l < M;++l){
+
+                     ward += ppharray[1][a + b*M + s*M2 + k*M3 + l*M4 + e*M5] * ppharray[1][c + d*M + s*M2 + k*M3 + l*M4 + t*M5]
+
+                        + ppharray[1][a + b*M + s*M2 + k*M3 + l*M4 + t*M5] * ppharray[1][c + d*M + s*M2 + k*M3 + l*M4 + e*M5];
+
+                  }
+
+            (*this)(i,j) += 2.0 * ward;
+
+         }
+
+         (*this)(i,j) *= scale/(2.0*S + 1.0);
+
+      }
+   }
+
+   delete [] ppharray[0];
+   delete [] ppharray[1];
+
+   delete [] ppharray;
+
+
+}

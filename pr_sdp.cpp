@@ -68,7 +68,7 @@ int main(void) {
    int tot_iter = 0;
 
    //outer iteration: scaling of the potential barrier
-   //while(t > 1.0e-12){
+   while(t > 1.0e-12){
 
       cout << t << "\t" << rdm.trace() << "\t" << rdm.ddot(ham) << "\t";
 
@@ -78,7 +78,7 @@ int main(void) {
 
       //inner iteration: 
       //Newton's method for finding the minimum of the current potential
-    //  while(convergence > tolerance){
+      while(convergence > tolerance){
 
          ++nr_newton_iter;
 
@@ -103,11 +103,11 @@ int main(void) {
 
          convergence = a*a*delta.ddot(delta);
 
-      //}
+      }
 
       cout << nr_newton_iter << endl;
 
-      t /= 5.0;
+      t /= 2.0;
 
       //what is the tolerance for the newton method?
       tolerance = 1.0e-5*t;
@@ -129,7 +129,7 @@ int main(void) {
 
       tot_iter += nr_newton_iter;
 
-   //}
+   }
 
    cout << endl;
 

@@ -56,6 +56,8 @@ class TPTPM : public Matrix {
 
       void dptw(const PPHM &);
 
+      void dpt2(const PPHM &);
+
       static int gn();
 
       static int gtpmm2t(int,int);
