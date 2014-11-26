@@ -35,7 +35,7 @@ int main(void) {
    cout.precision(10);
 
    const int M = 6;//dim sp hilbert space
-   const int N = 5;//nr of particles
+   const int N = 6;//nr of particles
 
    Tools::init(M,N);
 
